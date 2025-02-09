@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const feedbackSchema = new mongoose.Schema({
-  studentName: { type: String, required: true },
+  enrollmentNumber: { type: String, required: true }, // Use enrollment number
   message: { type: String, required: true },
   date: { type: Date, default: Date.now },
 });

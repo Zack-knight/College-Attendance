@@ -9,12 +9,14 @@ import AttendanceRecords from './components/AttendanceRecords';
 import UserDashboard from './components/UserDashboard';
 import FacultyDashboard from './components/FacultyDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import Home from './components/Home'; // Import Home component
 import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Home />} /> {/* Home page */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route

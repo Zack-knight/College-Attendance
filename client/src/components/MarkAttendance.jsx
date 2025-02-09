@@ -1,24 +1,18 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
 
 const MarkAttendance = () => {
   const [formData, setFormData] = useState({
-    studentName: '',
+    enrollmentNumber: '',
     subject: '',
     session: '',
     status: 'Present',
   });
 
-  const token = localStorage.getItem('token');
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/attendance/mark', formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await axios.post('/attendance/mark', formData);
       alert(response.data.message);
     } catch (err) {
       console.error(err);
@@ -32,9 +26,9 @@ const MarkAttendance = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            placeholder="Student Name"
-            value={formData.studentName}
-            onChange={(e) => setFormData({ ...formData, studentName: e.target.value })}
+            placeholder="Enrollment Number"
+            value={formData.enrollmentNumber}
+            onChange={(e) => setFormData({ ...formData, enrollmentNumber: e.target.value })}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
