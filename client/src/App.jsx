@@ -9,14 +9,16 @@ import AttendanceRecords from './components/AttendanceRecords';
 import UserDashboard from './components/UserDashboard';
 import FacultyDashboard from './components/FacultyDashboard';
 import AdminDashboard from './components/AdminDashboard';
-import Home from './components/Home'; // Import Home component
+import Home from './components/Home';
 import ProtectedRoute from './components/ProtectedRoute';
+import Navbar from './components/Navbar'; 
 
 const App = () => {
   return (
     <Router>
+      <Navbar /> {/* Add Navbar here */}
       <Routes>
-        <Route path="/" element={<Home />} /> {/* Home page */}
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route

@@ -27,46 +27,46 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Admin Dashboard</h1>
+    <div className="min-h-screen bg-gradient-dark p-8 pt-20">
+      <h1 className="text-2xl font-bold mb-6 text-center text-primary">Admin Dashboard</h1>
       <div className="space-y-4">
         <Link
           to="/attendance-records"
-          className="block bg-blue-500 text-white py-2 px-4 rounded-lg text-center hover:bg-blue-600 transition duration-300"
+          className="btn-primary block text-center"
         >
           View Attendance Records
         </Link>
         <Link
           to="/feedback-list"
-          className="block bg-blue-500 text-white py-2 px-4 rounded-lg text-center hover:bg-blue-600 transition duration-300"
+          className="btn-primary block text-center"
         >
           View Feedback
         </Link>
       </div>
       <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4 text-gray-800">All Users</h2>
-        <div className="overflow-x-auto bg-white rounded-lg shadow-md">
+        <h2 className="text-xl font-bold mb-4 text-primary">All Users</h2>
+        <div className="overflow-x-auto card">
           <table className="min-w-full">
             <thead>
-              <tr className="bg-gray-200">
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Enrollment Number</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+              <tr className="bg-gradient-to-r from-primary to-secondary">
+                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Name</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Email</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Role</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Enrollment Number</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-white">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-700">
               {users.map((user) => (
-                <tr key={user._id} className="hover:bg-gray-50 transition duration-300">
-                  <td className="px-6 py-4 text-sm text-gray-900">{user.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{user.email}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{user.role}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{user.enrollmentNumber}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                <tr key={user._id} className="hover:bg-gray-700 transition duration-300">
+                  <td className="px-6 py-4 text-sm text-text">{user.name}</td>
+                  <td className="px-6 py-4 text-sm text-text">{user.email}</td>
+                  <td className="px-6 py-4 text-sm text-text">{user.role}</td>
+                  <td className="px-6 py-4 text-sm text-text">{user.enrollmentNumber}</td>
+                  <td className="px-6 py-4 text-sm text-text">
                     <button
                       onClick={() => handleDelete(user._id)}
-                      className="text-red-500 hover:text-red-700 transition duration-300"
+                      className="btn-danger"
                     >
                       Delete
                     </button>

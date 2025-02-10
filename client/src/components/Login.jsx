@@ -5,6 +5,7 @@ import {jwtDecode} from 'jwt-decode';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -28,34 +29,32 @@ const Login = () => {
         navigate('/admin-dashboard');
       }
     } catch (err) {
+      setError('Login failed. Please check your credentials.');
       console.error(err);
-      alert('Login failed. Please check your credentials.');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Login</h1>
+    <div className="min-h-screen bg-gradient-dark flex items-center justify-center p-8 pt-20">
+      <div className="card w-96">
+        <h1 className="text-2xl font-bold mb-6 text-center text-primary">Login</h1>
+        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
             placeholder="Email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-card text-text"
           />
           <input
             type="password"
             placeholder="Password"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-card text-text"
           />
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300"
-          >
+          <button type="submit" className="btn-primary w-full">
             Login
           </button>
         </form>

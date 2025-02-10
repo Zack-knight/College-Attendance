@@ -26,28 +26,28 @@ const FeedbackList = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-2xl font-bold mb-6 text-center">Feedback List</h1>
-      <div className="overflow-x-auto bg-white rounded-lg shadow-md">
+    <div className="min-h-screen bg-gradient-dark p-8 pt-20">
+      <h1 className="text-2xl font-bold mb-6 text-center text-primary">Feedback List</h1>
+      <div className="overflow-x-auto card">
         <table className="min-w-full">
           <thead>
-            <tr className="bg-gray-200">
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Student Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Message</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+            <tr className="bg-gradient-to-r from-primary to-secondary">
+              <th className="px-6 py-3 text-left text-sm font-semibold text-white">Enrollment Number</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-white">Message</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-white">Date</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-white">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-700">
             {feedback.map((item) => (
-              <tr key={item._id} className="hover:bg-gray-50 transition duration-300">
-                <td className="px-6 py-4 text-sm text-gray-900">{item.studentName}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{item.message}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">{new Date(item.date).toLocaleDateString()}</td>
-                <td className="px-6 py-4 text-sm text-gray-900">
+              <tr key={item._id} className="hover:bg-gray-700 transition duration-300">
+                <td className="px-6 py-4 text-sm text-text">{item.enrollmentNumber}</td>
+                <td className="px-6 py-4 text-sm text-text">{item.message}</td>
+                <td className="px-6 py-4 text-sm text-text">{new Date(item.date).toLocaleDateString()}</td>
+                <td className="px-6 py-4 text-sm text-text">
                   <button
                     onClick={() => handleDelete(item._id)}
-                    className="text-red-500 hover:text-red-700 transition duration-300"
+                    className="btn-danger"
                   >
                     Delete
                   </button>

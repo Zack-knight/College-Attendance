@@ -7,6 +7,6 @@ const auth = require('../middleware/auth');
 router.post('/mark', auth(['teacher']), markAttendance);
 
 // Admins and teachers can view attendance records
-router.get('/records', auth(['admin', 'teacher']), getAttendance);
+router.get('/records', auth(['admin', 'teacher', 'student']), getAttendance);
 
 module.exports = router;
