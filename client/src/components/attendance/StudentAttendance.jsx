@@ -40,8 +40,10 @@ const StudentAttendance = () => {
 
   const fetchEnrolledCourses = async () => {
     try {
+      setLoading(true);
       const response = await axios.get('/api/course/student');
       setEnrolledCourses(response.data);
+      
       // Fetch active sessions for each course
       const sessionsPromises = response.data.map(course =>
         axios.get(`/api/attendance/course/${course._id}/sessions`)
@@ -50,21 +52,24 @@ const StudentAttendance = () => {
       const allSessions = sessionsResponses.flatMap(response => response.data);
       setActiveSessions(allSessions.filter(session => session.status === 'open'));
     } catch (error) {
-      setError('Failed to fetch courses and sessions');
+      console.error('Error fetching courses:', error);
+      setError(error.response?.data?.message || 'Failed to fetch courses and sessions');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleMarkAttendance = async (status) => {
     try {
       setLoading(true);
-      await axios.post('/api/attendance/mark', {
-        sessionId: selectedSession._id,
+      await axios.post(`/api/attendance/session/${selectedSession._id}/mark`, {
         status
       });
       setSuccess('Attendance marked successfully');
       setOpenDialog(false);
       fetchEnrolledCourses(); // Refresh sessions
     } catch (error) {
+      console.error('Error marking attendance:', error);
       setError(error.response?.data?.message || 'Failed to mark attendance');
     } finally {
       setLoading(false);
