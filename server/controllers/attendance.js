@@ -1,41 +1,32 @@
-const Attendance = require('../models/Attendance');
+const Attendance = require('../models/attendance');
 const User = require('../models/User');
 const sendEmail = require('../utils/email');
 
+// Mark attendance for a subject and date
 exports.markAttendance = async (req, res) => {
-  const { enrollmentNumber, subject, session, status } = req.body;
+  const { subject, date, records } = req.body;
   try {
-    // Check if the enrollment number exists
-    const user = await User.findOne({ enrollmentNumber });
-    if (!user) {
-      return res.status(404).json({ error: 'Student not found' });
+    if (!subject || !date || !Array.isArray(records) || records.length === 0) {
+      return res.status(400).json({ error: 'Subject, date, and records are required' });
     }
-
-    const attendance = new Attendance({ enrollmentNumber, subject, session, status });
+    const attendance = new Attendance({ subject, date, records });
     await attendance.save();
-
-    // Check for low attendance
-    const totalClasses = await Attendance.countDocuments({ enrollmentNumber, subject });
-    const presentClasses = await Attendance.countDocuments({ enrollmentNumber, subject, status: 'Present' });
-    const attendancePercentage = (presentClasses / totalClasses) * 100;
-
-    if (attendancePercentage < 75) {
-      sendEmail(
-        user.email,
-        'Low Attendance Alert',
-        `Your attendance in ${subject} is ${attendancePercentage.toFixed(2)}%. Please improve your attendance.`
-      );
-    }
-
     res.status(201).json({ message: 'Attendance marked successfully', attendance });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+// Get attendance for a subject (and optionally a date)
 exports.getAttendance = async (req, res) => {
   try {
-    const attendance = await Attendance.find();
+    const { subject, date } = req.query;
+    const query = {};
+    if (subject) query.subject = subject;
+    if (date) query.date = new Date(date);
+    const attendance = await Attendance.find(query)
+      .populate('subject', 'name')
+      .populate('records.student', 'name enrollmentNumber');
     res.status(200).json(attendance);
   } catch (err) {
     res.status(500).json({ error: err.message });

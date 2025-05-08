@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../utils/axios';
 import { Link } from 'react-router-dom';
+import axios from '../utils/axios';
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);

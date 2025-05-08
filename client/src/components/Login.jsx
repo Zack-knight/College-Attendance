@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -10,24 +10,27 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       const response = await axios.post('/auth/login', formData);
       localStorage.setItem('token', response.data.token);
-
-      // Decode the token to get user role
       const decoded = jwtDecode(response.data.token);
-      if (!decoded) {
-        throw new Error('Invalid token');
+      if (!decoded) throw new Error('Invalid token');
+      // Post-login domain check
+      if (decoded.role === 'student' && !formData.email.endsWith('@mits.in')) {
+        setError('Student email must end with @mits.in');
+        localStorage.removeItem('token');
+        return;
       }
-
-      // Redirect based on role
-      if (decoded.role === 'student') {
-        navigate('/user-dashboard');
-      } else if (decoded.role === 'teacher') {
-        navigate('/faculty-dashboard');
-      } else if (decoded.role === 'admin') {
-        navigate('/admin-dashboard');
+      if (decoded.role === 'teacher' && !formData.email.endsWith('@mitsgwalior.in')) {
+        setError('Faculty email must end with @mitsgwalior.in');
+        localStorage.removeItem('token');
+        return;
       }
+      // Admin can use any email
+      if (decoded.role === 'student') navigate('/user-dashboard');
+      else if (decoded.role === 'teacher') navigate('/faculty-dashboard');
+      else if (decoded.role === 'admin') navigate('/admin-dashboard');
     } catch (err) {
       setError('Login failed. Please check your credentials.');
       console.error(err);
@@ -35,26 +38,59 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-dark flex items-center justify-center p-8 pt-20">
-      <div className="card w-96">
-        <h1 className="text-2xl font-bold mb-6 text-center text-primary">Login</h1>
-        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-card text-text"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-card text-text"
-          />
-          <button type="submit" className="btn-primary w-full">
+    <div className="min-h-screen bg-gradient-to-br from-sky-200 via-cyan-100 to-white flex items-center justify-center px-4 py-12">
+      <div className="bg-white bg-opacity-80 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <h1 className="text-3xl font-extrabold text-center text-teal-600 mb-6">Login</h1>
+
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Email Field */}
+          <div className="relative">
+            <input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className={`peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-400`}
+              required
+            />
+            <label
+              htmlFor="email"
+              className={`absolute left-4 text-sm text-gray-500 transition-all 
+                transform scale-90 origin-left top-2.5 
+                peer-focus:top-2 peer-focus:scale-90 
+                ${formData.email ? 'top-2 scale-90' : 'top-4 scale-100 text-base text-gray-400'}`}
+            >
+              Email
+            </label>
+          </div>
+
+          {/* Password Field */}
+          <div className="relative">
+            <input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className={`peer w-full px-4 pt-5 pb-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-400`}
+              required
+            />
+            <label
+              htmlFor="password"
+              className={`absolute left-4 text-sm text-gray-500 transition-all 
+                transform scale-90 origin-left top-2.5 
+                peer-focus:top-2 peer-focus:scale-90 
+                ${formData.password ? 'top-2 scale-90' : 'top-4 scale-100 text-base text-gray-400'}`}
+            >
+              Password
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-teal-500 hover:bg-teal-400 text-white font-semibold py-2 rounded-lg shadow-md transition"
+          >
             Login
           </button>
         </form>

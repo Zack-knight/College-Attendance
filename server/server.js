@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const attendanceRoutes = require('./routes/attendance');
 const feedbackRoutes = require('./routes/feedback');
 const userRoutes = require('./routes/user')
+const subjectRoutes = require('./routes/subject');
 
 dotenv.config();
 const app = express();
@@ -23,6 +24,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/user', userRoutes)
+app.use('/api/subject', subjectRoutes);
 
 // Start server
 app.listen(PORT, () => {
