@@ -40,7 +40,7 @@ const App = () => {
         <Route
           path="/mark-attendance"
           element={
-            <ProtectedRoute roles={['teacher']}>
+            <ProtectedRoute roles={['teacher', 'admin']}>
               <MarkAttendance />
             </ProtectedRoute>
           }

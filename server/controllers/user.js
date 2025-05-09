@@ -9,6 +9,15 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+exports.getAllStudents = async (req, res) => {
+  try {
+    const students = await User.find({ role: 'student' });
+    res.status(200).json(students);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
