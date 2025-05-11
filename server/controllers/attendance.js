@@ -144,3 +144,85 @@ exports.getAttendance = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getAttendanceSummary = async (req, res) => {
+  try {
+    const { dateFrom, dateTo, semester, enrollmentNumber, student, subject } = req.query;
+    const user = req.user; // Populated by auth middleware
+
+    // 1. Build subject query based on role
+    let subjectQuery = {};
+    if (subject) subjectQuery.name = subject;
+    if (user.role === 'teacher') {
+      subjectQuery.faculty = user._id; // Only their own subjects
+    }
+    // Admin: no extra filter, gets all subjects
+
+    const subjects = await Subject.find(subjectQuery).lean();
+
+    // 2. Get all students (or filtered)
+    let studentQuery = { role: 'student' };
+    if (semester) studentQuery.semester = semester;
+    if (enrollmentNumber) studentQuery.enrollmentNumber = enrollmentNumber;
+    if (student) studentQuery.name = { $regex: student, $options: 'i' };
+    const students = await User.find(studentQuery).lean();
+
+    // 4. For each subject, count total classes held in date range
+    const subjectTotals = {};
+    for (const subj of subjects) {
+      const attQuery = { subject: subj._id };
+      if (dateFrom || dateTo) {
+        attQuery.date = {};
+        if (dateFrom) attQuery.date.$gte = new Date(dateFrom);
+        if (dateTo) attQuery.date.$lte = new Date(dateTo);
+      }
+      subjectTotals[subj._id] = await Attendance.countDocuments(attQuery);
+    }
+
+    // 5. For each student, for each subject, count attended classes
+    const studentRows = [];
+    for (const stu of students) {
+      const attendance = {};
+      for (const subj of subjects) {
+        const attQuery = { subject: subj._id };
+        if (dateFrom || dateTo) {
+          attQuery.date = {};
+          if (dateFrom) attQuery.date.$gte = new Date(dateFrom);
+          if (dateTo) attQuery.date.$lte = new Date(dateTo);
+        }
+        // Find all attendance docs for this subject in range
+        const attDocs = await Attendance.find(attQuery).lean();
+        let attended = 0;
+        for (const doc of attDocs) {
+          const rec = doc.records.find(r => r.student?.toString() === stu._id.toString());
+          if (rec && rec.status === 'present') attended++;
+        }
+        const total = subjectTotals[subj._id] || 0;
+        attendance[subj._id] = {
+          attended,
+          percent: total ? Math.round((attended / total) * 100) : 0
+        };
+      }
+      studentRows.push({
+        enrollmentNumber: stu.enrollmentNumber,
+        name: stu.name,
+        semester: stu.semester,
+        attendance
+      });
+    }
+
+    // 6. Return
+    res.json({
+      subjects: subjects.map(s => ({
+        _id: s._id,
+        code: s.code || '', // If you have a code field
+        name: s.name,
+        totalClasses: subjectTotals[s._id] || 0
+      })),
+      students: studentRows
+    });
+  } catch (err) {
+    console.error('Error in getAttendanceSummary:', err);
+    res.status(500).json({ error: err.message });
+  }
+};

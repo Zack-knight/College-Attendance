@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from '../utils/axios';
 import { Link } from 'react-router-dom';
+import React from 'react';
 
 // CSV export helper
 function toCSV(rows, columns) {
@@ -35,6 +36,7 @@ const AttendanceRecords = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [summary, setSummary] = useState({ subjects: [], students: [] });
 
   // Fetch filter options (subjects, faculties)
   useEffect(() => {
@@ -113,6 +115,23 @@ const AttendanceRecords = () => {
     };
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const params = { ...filters };
+        const res = await axios.get('/attendance/summary', { params });
+        setSummary(res.data);
+      } catch (err) {
+        setError('Failed to load attendance summary.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSummary();
+  }, [filters]);
 
   // Handle sort click
   const handleSort = (column) => {
@@ -237,9 +256,9 @@ const AttendanceRecords = () => {
                 <label className="block text-gray-700 font-medium mb-1">Status</label>
                 <select value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full">
                   <option value="all" className="font-bold text-gray-900">All</option>
-                  <option value="present">Present</option>
-                  <option value="absent">Absent</option>
-                </select>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+          </select>
               </div>
               {/* Reset Filters Button */}
               <div className="min-w-[150px] flex items-end">
@@ -251,68 +270,81 @@ const AttendanceRecords = () => {
                   Reset Filters
                 </button>
               </div>
-            </div>
+        </div>
 
-            {/* Table Section */}
+        {/* Table Section */}
             {error && (
               <div className="w-full max-w-6xl mb-4 p-4 bg-red-100 text-red-700 rounded-lg font-semibold text-center shadow">
                 {error}
               </div>
             )}
-            <div className="overflow-x-auto w-full max-w-6xl bg-white/80 backdrop-blur-md rounded-2xl shadow-xl ring-1 ring-white/30">
-              <table className="min-w-full text-sm text-gray-800">
-                <thead>
-                  <tr className="bg-gradient-to-r from-teal-400 to-cyan-400 text-white text-left">
-                    <th className="px-6 py-4 font-semibold cursor-pointer select-none" onClick={() => handleSort('enrollmentNumber')}>Enrollment No.{getSortIndicator('enrollmentNumber')}</th>
-                    <th className="px-6 py-4 font-semibold cursor-pointer select-none" onClick={() => handleSort('studentName')}>Student Name{getSortIndicator('studentName')}</th>
-                    <th className="px-6 py-4 font-semibold cursor-pointer select-none" onClick={() => handleSort('subject')}>Subject{getSortIndicator('subject')}</th>
-                    <th className="px-6 py-4 font-semibold cursor-pointer select-none" onClick={() => handleSort('facultyName')}>Faculty{getSortIndicator('facultyName')}</th>
-                    <th className="px-6 py-4 font-semibold cursor-pointer select-none" onClick={() => handleSort('course')}>Course{getSortIndicator('course')}</th>
-                    <th className="px-6 py-4 font-semibold cursor-pointer select-none" onClick={() => handleSort('semester')}>Semester{getSortIndicator('semester')}</th>
-                    <th className="px-6 py-4 font-semibold cursor-pointer select-none" onClick={() => handleSort('status')}>Status{getSortIndicator('status')}</th>
-                    <th className="px-6 py-4 font-semibold cursor-pointer select-none" onClick={() => handleSort('date')}>Date{getSortIndicator('date')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {loading ? (
-                    Array.from({ length: 6 }).map((_, idx) => (
-                      <tr key={idx}>
-                        {Array.from({ length: 8 }).map((_, colIdx) => (
-                          <td key={colIdx} className="px-6 py-4">
-                            <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+        <div className="overflow-x-auto w-full max-w-7xl bg-white/90 rounded-2xl shadow-xl ring-1 ring-white/30">
+          <table className="min-w-full text-sm text-gray-800 border border-gray-200">
+            <thead>
+              <tr className="bg-gradient-to-r from-teal-400 to-cyan-400 text-white text-left sticky top-0 z-10">
+                <th className="px-4 py-2 border-b border-gray-200">S.No.</th>
+                <th className="px-4 py-2 border-b border-gray-200">Enrollment No.</th>
+                <th className="px-4 py-2 border-b border-gray-200">Student Name</th>
+                {summary.subjects.map(subj => (
+                  <th key={subj._id} colSpan={2} className="px-4 py-2 border-b border-gray-200 text-center">
+                    <div className="font-semibold">{subj.name}</div>
+                    {subj.code && <div className="text-xs font-normal">{subj.code}</div>}
+                  </th>
+                ))}
+              </tr>
+              <tr className="bg-gray-100 sticky top-12 z-10">
+                <th colSpan={3} className="px-4 py-2 border-b border-gray-200"></th>
+                {summary.subjects.map(subj => (
+                  <React.Fragment key={subj._id}>
+                    <th className="px-2 py-2 border-b border-gray-200 text-center font-semibold">Attended</th>
+                    <th className="px-2 py-2 border-b border-gray-200 text-center font-semibold">%</th>
+                  </React.Fragment>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {/* Total Classes Held Row */}
+              <tr className="bg-yellow-50 font-bold">
+                <td colSpan={3} className="px-4 py-2 text-right border-b border-gray-200">Total Classes Held</td>
+                {summary.subjects.map(subj => (
+                  <React.Fragment key={subj._id}>
+                    <td className="px-2 py-2 text-center border-b border-gray-200">{subj.totalClasses}</td>
+                    <td className="px-2 py-2 text-center border-b border-gray-200"></td>
+                  </React.Fragment>
+                ))}
+              </tr>
+              {/* Student Attendance Rows */}
+              {loading ? (
+                <tr>
+                  <td colSpan={3 + summary.subjects.length * 2} className="text-center py-8 text-gray-500">Loading...</td>
+                </tr>
+              ) : summary.students.length === 0 ? (
+                <tr>
+                  <td colSpan={3 + summary.subjects.length * 2} className="text-center py-8 text-gray-500">No records found.</td>
+                </tr>
+              ) : (
+                summary.students.map((stu, idx) => (
+                  <tr key={stu.enrollmentNumber} className="hover:bg-gray-50 transition">
+                    <td className="px-4 py-2 border-b border-gray-100">{idx + 1}</td>
+                    <td className="px-4 py-2 border-b border-gray-100">{stu.enrollmentNumber}</td>
+                    <td className="px-4 py-2 border-b border-gray-100">{stu.name}</td>
+                    {summary.subjects.map(subj => {
+                      const att = stu.attendance[subj._id] || { attended: 0, percent: 0 };
+                      return (
+                        <React.Fragment key={subj._id}>
+                          <td className="px-2 py-2 text-center border-b border-gray-100">{att.attended}</td>
+                          <td className={`px-2 py-2 text-center font-bold border-b border-gray-100 ${att.percent < 75 ? 'bg-red-200 text-red-700' : ''}`}>
+                            {att.percent}%
                           </td>
-                        ))}
-                      </tr>
-                    ))
-                  ) : Array.isArray(attendanceRecords) && attendanceRecords.length > 0 ? (
-                    attendanceRecords.map((rec) => (
-                      <tr key={rec._id} className="hover:bg-gray-100 transition">
-                        <td className="px-6 py-4">{rec.enrollmentNumber}</td>
-                        <td className="px-6 py-4">{rec.studentName}</td>
-                        <td className="px-6 py-4">{rec.subject}</td>
-                        <td className="px-6 py-4">{rec.facultyName || rec.faculty}</td>
-                        <td className="px-6 py-4">{rec.course}</td>
-                        <td className="px-6 py-4">{rec.semester}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(rec.status)}`}>
-                            {rec.status.charAt(0).toUpperCase() + rec.status.slice(1)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          {new Date(rec.date).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="8" className="text-center py-8 text-gray-500">
-                        No attendance records found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                        </React.Fragment>
+                      );
+                    })}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
             {/* Pagination Controls */}
             {totalPages > 1 && (

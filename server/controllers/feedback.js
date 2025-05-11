@@ -4,16 +4,21 @@ const User = require('../models/User');
 exports.submitFeedback = async (req, res) => {
   console.log('Decoded user from token:', req.user);
   const { message } = req.body;
-
+  console.log('Message:', message);
   try {
-    if (!req.user || !req.user.id || !message) {
+    if (!req.user || !(req.user.id || req.user._id) || !message) {
       return res.status(400).json({ error: 'User not authenticated or message missing' });
+      // console.log('User not authenticated or message missing');
     }
-    const feedback = new Feedback({ student: req.user.id, message });
+    console.log('User ID:', req.user.id || req.user._id);
+    const feedback = new Feedback({ student: req.user.id || req.user._id, message });
+    console.log('Feedback:', feedback);
     await feedback.save();
+    console.log('Feedback saved:', feedback);
     res.status(201).json({ message: 'Feedback submitted successfully', feedback });
   } catch (err) {
     res.status(500).json({ error: err.message });
+    console.log('Error:', err);
   }
 };
 
