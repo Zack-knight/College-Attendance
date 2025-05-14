@@ -2,6 +2,15 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from '../utils/axios';
 import Navbar from './Navbar';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  FadeIn,
+  SlideInUp,
+  Card3D,
+  GlassCard,
+  GradientBackground,
+  MorphingBlob
+} from './AnimationUtils';
 
 const AdminSubjectList = () => {
   const [subjects, setSubjects] = useState([]);
@@ -227,20 +236,6 @@ const AdminSubjectList = () => {
         return <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-medium">Course</span>;
       case 'event':
         return <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full font-medium">Event</span>;
-      default:
-        return <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full font-medium capitalize">{type}</span>;
-    }
-  };
-
-  return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-sky-200 via-cyan-100 to-white px-4 pt-28 pb-16 flex flex-col items-center">
-        <div className={`flex flex-col items-center ${fadeIn}`}>
-          <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-4 tracking-tight">
-            <span className="text-teal-600">Subject Management</span>
-          </h1>
-          <p className="text-gray-600 text-lg mb-8 max-w-2xl text-center">
             View, filter, and manage all subjects in the system.
           </p>
           

@@ -16,18 +16,6 @@ import {
 } from './AnimationUtils';
 
 const Home = () => {
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        staggerChildren: 0.2,
-        delayChildren: 0.3
-      }
-    }
-  };
-  
   return (
     <div className="min-h-screen bg-background overflow-hidden text-white flex flex-col relative">
       {/* Animated Gradient Background */}
@@ -38,19 +26,19 @@ const Home = () => {
         color="bg-cyan-500" 
         size="w-64 h-64" 
         opacity="opacity-10" 
-        className="absolute top-0 left-0 -translate-x-1/4"
+        className="top-0 left-0 -translate-x-1/4"
       />
       <MorphingBlob 
         color="bg-purple-500" 
         size="w-96 h-96" 
         opacity="opacity-10" 
-        className="absolute bottom-0 right-0 translate-x-1/4"
+        className="bottom-0 right-0 translate-x-1/4"
       />
       <MorphingBlob 
         color="bg-blue-500" 
         size="w-80 h-80" 
         opacity="opacity-10" 
-        className="absolute top-1/2 right-1/4 -translate-y-1/2"
+        className="top-1/2 right-1/4 -translate-y-1/2"
       />
       
       <main className="flex-grow flex flex-col items-center justify-center p-6 md:p-10 z-10">

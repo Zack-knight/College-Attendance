@@ -1,7 +1,15 @@
 import { jwtDecode } from 'jwt-decode';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from '../utils/axios';
+import { motion } from 'framer-motion';
+import {
+  FadeIn,
+  SlideInUp,
+  GlassCard,
+  GradientBackground,
+  MorphingBlob
+} from './AnimationUtils';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -66,23 +74,81 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-100 via-cyan-50 to-sky-50 flex items-center justify-center px-4 py-12">
-      <div className="bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl shadow-xl p-8 w-full max-w-md border border-white/30 transition-all duration-300 animate-fadeIn hover:shadow-2xl">
+    <div className="min-h-screen bg-background overflow-hidden flex items-center justify-center px-4 py-12 relative">
+      {/* Animated Gradient Background */}
+      <GradientBackground gradient="from-cyan-500/10 via-blue-600/10 to-purple-600/10" />
+      <MorphingBlob 
+        color="bg-cyan-500" 
+        size="w-64 h-64" 
+        opacity="opacity-10" 
+        className="absolute top-0 left-0 -translate-x-1/4"
+      />
+      <MorphingBlob 
+        color="bg-purple-500" 
+        size="w-96 h-96" 
+        opacity="opacity-10" 
+        className="absolute bottom-0 right-0 translate-x-1/4"
+      />
+      
+      <FadeIn className="z-10">
+        <motion.div 
+          className="relative"
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          whileHover={{ scale: 1.01, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+        >
+          <GlassCard className="p-8 w-full max-w-md border border-white/30 transition-all duration-300">
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-teal-400 to-cyan-500 flex items-center justify-center shadow-lg animate-slideInUp">
+          <motion.div 
+            className="w-16 h-16 rounded-full bg-gradient-to-r from-teal-400 to-cyan-500 flex items-center justify-center shadow-lg"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.2 }}
+            whileHover={{ scale: 1.1, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1)" }}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
             </svg>
-          </div>
+          </motion.div>
         </div>
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-2 animate-fadeIn">Welcome Back</h1>
-        <p className="text-center text-gray-500 mb-6 animate-fadeIn">Sign in to your account</p>
+        <motion.h1 
+          className="text-3xl font-bold text-center text-white mb-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          Welcome Back
+        </motion.h1>
+        <motion.p 
+          className="text-center text-gray-200 mb-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          Sign in to your account
+        </motion.p>
 
-        {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 animate-fadeIn">{error}</div>}
+        {error && (
+          <motion.div 
+            className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          >
+            {error}
+          </motion.div>
+        )}
 
-        <form onSubmit={handleSubmit} className="space-y-5 animate-fadeIn">
+        <motion.form 
+          onSubmit={handleSubmit} 
+          className="space-y-5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
           <div className="space-y-1">
-            <label className="block text-gray-700 text-sm font-medium">Email Address</label>
+            <label className="block text-white text-sm font-medium">Email Address</label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -90,43 +156,48 @@ const Login = () => {
                   <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                 </svg>
               </div>
-              <input
+              <motion.input
                 type="email"
-                placeholder="your.email@example.com"
+                placeholder="you@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 text-gray-800 transition-all duration-200 bg-white bg-opacity-90 shadow-sm group-hover:shadow-md"
+                whileFocus={{ scale: 1.01, boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)" }}
                 required
               />
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-300">
               Students use @mits.in | Faculty use @mitsgwalior.in
             </p>
           </div>
           
           <div className="space-y-1">
-            <label className="block text-gray-700 text-sm font-medium">Password</label>
+            <label className="block text-white text-sm font-medium">Password</label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
-              <input
+              <motion.input
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 text-gray-800 transition-all duration-200 bg-white bg-opacity-90 shadow-sm group-hover:shadow-md"
+                whileFocus={{ scale: 1.01, boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)" }}
                 required
               />
             </div>
           </div>
 
-          <button
+          <motion.button
             type="submit"
-            className="w-full mt-6 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50 animate-fadeIn flex items-center justify-center"
+            className="w-full mt-6 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg flex items-center justify-center relative overflow-hidden group"
             disabled={loading}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
           >
             {loading ? (
               <>
@@ -144,23 +215,68 @@ const Login = () => {
                 Sign In
               </>
             )}
-          </button>
-        </form>
+          </motion.button>
+        </motion.form>
         
-        <div className="mt-6 text-center animate-fadeIn">
-          <p className="text-gray-600">
+        <motion.div 
+          className="mt-6 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
+          <p className="text-gray-200">
             Don't have an account?{' '}
-            <a href="/register" className="text-teal-600 hover:text-teal-500 font-medium transition-colors duration-200">
+            <Link to="/register" className="text-teal-400 hover:text-teal-300 font-medium transition-colors duration-200 relative group">
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-500 group-hover:w-full transition-all duration-300"></span>
               Register here
-            </a>
+            </Link>
           </p>
-        </div>
-      </div>
-      
-      {/* Animated background elements */}
-      <div className="fixed top-20 right-40 w-64 h-64 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-      <div className="fixed top-60 left-20 w-72 h-72 bg-cyan-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="fixed -bottom-20 right-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        </motion.div>
+          </GlassCard>
+        </motion.div>
+      </FadeIn>
+      {/* Additional Animated Elements */}
+      <motion.div 
+        className="absolute top-20 right-40 w-64 h-64 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+        animate={{
+          scale: [1, 1.2, 1],
+          x: [0, 10, 0],
+          y: [0, -10, 0],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          repeatType: "reverse"
+        }}
+      />
+      <motion.div 
+        className="absolute top-60 left-20 w-72 h-72 bg-cyan-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+        animate={{
+          scale: [1, 1.1, 1],
+          x: [0, -10, 0],
+          y: [0, 15, 0],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          repeatType: "reverse",
+          delay: 1
+        }}
+      />
+      <motion.div 
+        className="absolute -bottom-20 right-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+        animate={{
+          scale: [1, 1.3, 1],
+          x: [0, 15, 0],
+          y: [0, 10, 0],
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          repeatType: "reverse",
+          delay: 2
+        }}
+      />
     </div>
   );
 };

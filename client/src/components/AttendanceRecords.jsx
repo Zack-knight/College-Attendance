@@ -2,6 +2,16 @@ import { useEffect, useState } from 'react';
 import axios from '../utils/axios';
 import { Link } from 'react-router-dom';
 import React from 'react';
+import { motion } from 'framer-motion';
+import Navbar from './Navbar';
+import {
+  FadeIn,
+  SlideInUp,
+  Card3D,
+  GlassCard,
+  GradientBackground,
+  MorphingBlob
+} from './AnimationUtils';
 
 // CSV export helper
 function toCSV(rows, columns) {
@@ -13,6 +23,40 @@ function toCSV(rows, columns) {
 }
 
 const AttendanceRecords = () => {
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.3
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  };
+  
+  const tableRowVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: i => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: i * 0.05,
+        duration: 0.5,
+        type: "spring",
+        stiffness: 100
+      }
+    })
+  };
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [faculties, setFaculties] = useState([]);
@@ -387,253 +431,39 @@ const AttendanceRecords = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-200 via-cyan-100 to-white p-0">
-      <div className="pt-28 px-4 flex flex-col items-center">
-        {user && user.role === 'student' ? (
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-center text-gray-800 mb-2 tracking-tight">
-              📋 My Attendance
-            </h1>
-            <p className="text-gray-600">
-              Enrollment Number: <span className="font-semibold">{user.enrollmentNumber}</span> | 
-              Name: <span className="font-semibold">{user.name}</span>
-            </p>
-          </div>
-        ) : (
-          <h1 className="text-4xl md:text-5xl font-extrabold text-center text-gray-800 mb-10 tracking-tight">
-            📋 Attendance <span className="text-teal-600">Records</span>
-          </h1>
-        )}
-
-        {/* Export to CSV Button - Only visible for admin/faculty */}
-        {user && user.role !== 'student' && (
-          <div className="w-full max-w-6xl flex justify-end mb-2">
-            <button
-              className="px-4 py-2 bg-teal-500 text-white rounded-lg font-semibold shadow-sm hover:bg-teal-600 transition"
-              onClick={handleExportCSV}
-            >
-              Export to CSV
-            </button>
-          </div>
-        )}
-
-        {/* Role-based access check */}
-        {authChecked && (!user || (user.role !== 'admin' && user.role !== 'teacher' && user.role !== 'student')) && (
-          <div className="w-full max-w-2xl mt-32 p-8 bg-red-100 text-red-700 rounded-lg font-semibold text-center shadow text-xl">
-            You are not authorized to view this page.
-            <p className="mt-2 text-sm font-normal">Error: {!user ? 'User not authenticated' : `Role '${user.role}' is not authorized`}</p>
-            <button 
-              onClick={() => window.location.href = '/'}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-            >
-              Back to Home
-            </button>
-          </div>
-        )}
-        {authChecked && user && (user.role === 'admin' || user.role === 'teacher' || user.role === 'student') && (
-          <>
-            {/* Simplified Filters for Students */}
-            {user && user.role === 'student' ? (
-              <div className="mb-8 w-full max-w-6xl bg-white/90 rounded-xl shadow p-6 flex flex-wrap gap-4 items-end">
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Date From</label>
-                  <input type="date" value={filters.dateFrom} onChange={e => setFilters(f => ({ ...f, dateFrom: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full" />
-                </div>
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Date To</label>
-                  <input type="date" value={filters.dateTo} onChange={e => setFilters(f => ({ ...f, dateTo: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full" />
-                </div>
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Subject</label>
-                  <select value={filters.subject} onChange={e => setFilters(f => ({ ...f, subject: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full">
-                    <option value="" className="font-bold text-gray-900">All Subjects</option>
-                    {subjects.map(s => <option key={s._id} value={s.name}>{s.name}</option>)}
-                  </select>
-                </div>
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Status</label>
-                  <select value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full">
-                    <option value="all" className="font-bold text-gray-900">All</option>
-                    <option value="present">Present</option>
-                    <option value="absent">Absent</option>
-                  </select>
-                </div>
-                {/* Reset Filters Button */}
-                <div className="min-w-[150px] flex items-end">
-                  <button
-                    type="button"
-                    className="w-full px-4 py-2 bg-teal-500 text-white rounded-lg font-semibold shadow-sm hover:bg-teal-600 transition"
-                    onClick={() => setFilters({ status: 'all', subject: '', dateFrom: '', dateTo: '' })}
-                  >
-                    Reset Filters
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* Advanced Filters for Admin/Faculty */
-              <div className="mb-8 w-full max-w-6xl bg-white/90 rounded-xl shadow p-6 flex flex-wrap gap-4 items-end">
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Date From</label>
-                  <input type="date" value={filters.dateFrom} onChange={e => setFilters(f => ({ ...f, dateFrom: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full" />
-                </div>
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Date To</label>
-                  <input type="date" value={filters.dateTo} onChange={e => setFilters(f => ({ ...f, dateTo: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full" />
-                </div>
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Subject</label>
-                  <select value={filters.subject} onChange={e => setFilters(f => ({ ...f, subject: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full">
-                    <option value="" className="font-bold text-gray-900">All</option>
-                    {subjects.map(s => <option key={s._id} value={s.name}>{s.name}</option>)}
-                  </select>
-                </div>
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Faculty</label>
-                  <select value={filters.faculty} onChange={e => setFilters(f => ({ ...f, faculty: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full">
-                    <option value="" className="font-bold text-gray-900">All</option>
-                    {faculties.map(f => <option key={f._id} value={f.name}>{f.name}</option>)}
-                  </select>
-                </div>
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Student Name</label>
-                  <input type="text" value={filters.student} onChange={e => setFilters(f => ({ ...f, student: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full placeholder-gray-400" placeholder="Search by name" />
-                </div>
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Enrollment No.</label>
-                  <input type="text" value={filters.enrollmentNumber} onChange={e => setFilters(f => ({ ...f, enrollmentNumber: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full placeholder-gray-400" placeholder="Search by enrollment" />
-                </div>
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Semester</label>
-                  <input type="text" value={filters.semester} onChange={e => setFilters(f => ({ ...f, semester: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full placeholder-gray-400" placeholder="e.g. 5" />
-                </div>
-                <div className="min-w-[150px]">
-                  <label className="block text-gray-700 font-medium mb-1">Status</label>
-                  <select value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))} className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:ring-2 focus:ring-teal-400 shadow-sm min-w-full">
-                    <option value="all" className="font-bold text-gray-900">All</option>
-                    <option value="present">Present</option>
-                    <option value="absent">Absent</option>
-                  </select>
-                </div>
-                {/* Reset Filters Button */}
-                <div className="min-w-[150px] flex items-end">
-                  <button
-                    type="button"
-                    className="w-full px-4 py-2 bg-teal-500 text-white rounded-lg font-semibold shadow-sm hover:bg-teal-600 transition"
-                    onClick={() => setFilters({ status: 'all', subject: '', faculty: '', student: '', enrollmentNumber: '', course: '', semester: '', dateFrom: '', dateTo: '' })}
-                  >
-                    Reset Filters
-                  </button>
-                </div>
-              </div>
-            )}
-
-        {/* Table Section */}
-            {error && (
-              <div className="w-full max-w-6xl mb-4 p-4 bg-red-100 text-red-700 rounded-lg font-semibold text-center shadow">
-                {error}
-              </div>
-            )}
-        {/* Attendance Overview for Students */}
-        {user && user.role === 'student' && summary.subjects.length > 0 && (
-          <div className="w-full max-w-6xl mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            {summary.subjects.map(subj => {
-              const studentData = summary.students[0]; // For student, there's only one record (themselves)
-              const attendance = studentData?.attendance[subj._id] || { attended: 0, total: 0, percent: 0 };
-              const attendanceClass = attendance.percent >= 75 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
-              
-              return (
-                <div key={subj._id} className="bg-white rounded-xl shadow-md p-4 transition-transform hover:scale-105">
-                  <h3 className="font-bold text-gray-800 border-b pb-2 mb-2">{subj.name}</h3>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    <div className="bg-gray-100 p-2 rounded text-center">
-                      <div className="text-sm text-gray-500">Classes Held</div>
-                      <div className="font-bold text-xl">{attendance.total || subj.totalClasses}</div>
-                    </div>
-                    <div className="bg-gray-100 p-2 rounded text-center">
-                      <div className="text-sm text-gray-500">Attended</div>
-                      <div className="font-bold text-xl">{attendance.attended}</div>
-                    </div>
-                    <div className={`${attendanceClass} p-2 rounded text-center col-span-2`}>
-                      <div className="text-sm">Attendance Percentage</div>
-                      <div className="font-bold text-xl">{attendance.percent}%</div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-background overflow-hidden py-12 px-4 relative">
+        <GradientBackground gradient="from-teal-500/10 via-blue-600/10 to-purple-600/10" />
         
-        <div className="overflow-x-auto w-full max-w-7xl bg-white/90 rounded-2xl shadow-xl ring-1 ring-white/30">
-          <table className="min-w-full text-sm text-gray-800 border border-gray-200">
-            <thead>
-              <tr className="bg-gradient-to-r from-teal-400 to-cyan-400 text-white text-left sticky top-0 z-10">
-                <th className="px-4 py-2 border-b border-gray-200">S.No.</th>
-                <th className="px-4 py-2 border-b border-gray-200">Enrollment No.</th>
-                <th className="px-4 py-2 border-b border-gray-200">Student Name</th>
-                {summary.subjects.map(subj => (
-                  <th key={subj._id} colSpan={2} className="px-4 py-2 border-b border-gray-200 text-center">
-                    <div className="font-semibold">{subj.name}</div>
-                    {subj.code && <div className="text-xs font-normal">{subj.code}</div>}
-                  </th>
-                ))}
-              </tr>
-              <tr className="bg-gray-100 sticky top-12 z-10">
-                <th colSpan={3} className="px-4 py-2 border-b border-gray-200"></th>
-                {summary.subjects.map(subj => (
-                  <React.Fragment key={subj._id}>
-                    <th className="px-2 py-2 border-b border-gray-200 text-center font-semibold">Attended</th>
-                    <th className="px-2 py-2 border-b border-gray-200 text-center font-semibold">%</th>
-                  </React.Fragment>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {/* Total Classes Held Row */}
-              <tr className="bg-yellow-50 font-bold">
-                <td colSpan={3} className="px-4 py-2 text-right border-b border-gray-200">Total Classes Held</td>
-                {summary.subjects.map(subj => (
-                  <React.Fragment key={subj._id}>
-                    <td className="px-2 py-2 text-center border-b border-gray-200">{subj.totalClasses}</td>
-                    <td className="px-2 py-2 text-center border-b border-gray-200"></td>
-                  </React.Fragment>
-                ))}
-              </tr>
-              {/* Student Attendance Rows */}
-              {loading ? (
-                <tr>
-                  <td colSpan={3 + summary.subjects.length * 2} className="text-center py-8 text-gray-500">Loading...</td>
-                </tr>
-              ) : summary.students.length === 0 ? (
-                <tr>
-                  <td colSpan={3 + summary.subjects.length * 2} className="text-center py-8 text-gray-500">No records found.</td>
-                </tr>
-              ) : (
-                summary.students.map((stu, idx) => (
-                  <tr key={stu.enrollmentNumber} className="hover:bg-gray-50 transition">
-                    <td className="px-4 py-2 border-b border-gray-100">{idx + 1}</td>
-                    <td className="px-4 py-2 border-b border-gray-100">{stu.enrollmentNumber}</td>
-                    <td className="px-4 py-2 border-b border-gray-100">
-                      {/* Only make names clickable for faculty and admin */}
-                      {user && (user.role === 'teacher' || user.role === 'admin') ? (
-                        <Link 
-                          to={`/student-attendance/${stu._id}`} 
-                          className="text-teal-600 hover:text-teal-800 hover:underline font-medium flex items-center"
-                          title="View detailed attendance history"
-                          onClick={() => console.log('Clicked on student:', stu.name, 'with ID:', stu._id)}
-                        >
-                          {stu.name}
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                          </svg>
-                        </Link>
-                      ) : (
-                        stu.name
-                      )}
-                    </td>
-                    {summary.subjects.map(subj => {
-                      const att = stu.attendance[subj._id] || { attended: 0, percent: 0 };
-                      return (
+        <MorphingBlob 
+          color="bg-teal-500" 
+          size="w-64 h-64" 
+          opacity="opacity-10" 
+          className="absolute top-0 right-0 translate-x-1/4"
+        />
+        <MorphingBlob 
+          color="bg-purple-500" 
+          size="w-96 h-96" 
+          opacity="opacity-10" 
+          className="absolute bottom-0 left-0 -translate-x-1/4"
+        />
+        
+        <motion.div
+          className="relative z-10"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.h1 
+            className="text-3xl font-bold text-center text-white mb-8"
+            })}
+            className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Clear Filters
+          </motion.button>
                         <React.Fragment key={subj._id}>
                           <td className="px-2 py-2 text-center border-b border-gray-100">
                             {/* Make subject specific attendance detail accessible */}

@@ -2,6 +2,15 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from '../utils/axios';
 import Navbar from './Navbar';
+import { motion } from 'framer-motion';
+import {
+  FadeIn,
+  SlideInUp,
+  Card3D,
+  GlassCard,
+  GradientBackground,
+  MorphingBlob
+} from './AnimationUtils';
 
 const FacultySubjectList = () => {
   const [subjects, setSubjects] = useState([]);
@@ -19,15 +28,39 @@ const FacultySubjectList = () => {
   const [sortDirection, setSortDirection] = useState('asc');
   const [activeTab, setActiveTab] = useState('all');
   
-  // Animation classes
-  const fadeIn = "animate-fadeIn";
-  const slideIn = "animate-slideInRight";
-  const pulseAnimation = "hover:animate-pulse";
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.3
+      }
+    }
+  };
   
-  // Helper to get a random animation delay for staggered animations
-  const getRandomDelay = () => {
-    const delays = ['delay-100', 'delay-200', 'delay-300', 'delay-400'];
-    return delays[Math.floor(Math.random() * delays.length)];
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  };
+  
+  const tableRowVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: i => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: i * 0.05,
+        duration: 0.5,
+        type: "spring",
+        stiffness: 100
+      }
+    })
   };
 
   // Icons
@@ -123,22 +156,11 @@ const FacultySubjectList = () => {
         setSuccess('Subject created successfully!');
       }
       
-      resetForm();
+      // Refresh the subject list and reset form
       fetchSubjects();
+      resetForm();
     } catch (err) {
-      console.error('Error saving subject:', err);
-      const errorMessage = err.response?.data?.error || 'Failed to save subject';
-      const errorDetails = err.response?.data?.details;
-      
-      if (errorDetails) {
-        if (Array.isArray(errorDetails)) {
-          setError(`${errorMessage}: ${errorDetails.join(', ')}`);
-        } else {
-          setError(`${errorMessage}: ${errorDetails}`);
-        }
-      } else {
-        setError(errorMessage);
-      }
+      setError(err.response?.data?.error || 'Failed to save subject');
     } finally {
       setLoading(false);
     }
@@ -146,65 +168,74 @@ const FacultySubjectList = () => {
 
   // Handle subject deletion
   const handleDelete = async (id) => {
-    if (deleteConfirm === id) {
-      setLoading(true);
-      try {
-        await axios.delete(`/subject/${id}`);
-        setSuccess('Subject deleted successfully!');
-        setDeleteConfirm(null);
-        fetchSubjects();
-      } catch (err) {
-        setError(err.response?.data?.error || 'Failed to delete subject');
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setDeleteConfirm(id);
+    if (!id) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await axios.delete(`/subject/${id}`);
+      setSuccess('Subject deleted successfully!');
+      setDeleteConfirm(null);
+      
+      // Refresh the subject list
+      fetchSubjects();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to delete subject');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Filter and sort subjects
+  // Filter subjects based on search term and active tab
   const filteredSubjects = subjects.filter(subject => {
-    // Apply type filter
-    if (activeTab !== 'all' && subject.type !== activeTab) return false;
+    // Filter by search term
+    const matchesSearch = 
+      subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (subject.code && subject.code.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    // Apply search term
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
-      return (
-        subject.name.toLowerCase().includes(search) ||
-        subject.code.toLowerCase().includes(search)
-      );
-    }
-    return true;
+    // Filter by type tab
+    if (activeTab === 'all') return matchesSearch;
+    if (activeTab === 'courses') return matchesSearch && subject.type === 'course';
+    if (activeTab === 'events') return matchesSearch && subject.type === 'event';
+    
+    return matchesSearch;
   });
 
   // Sort subjects
   const sortedSubjects = [...filteredSubjects].sort((a, b) => {
-    let valueA = a[sortField];
-    let valueB = b[sortField];
+    let aValue = a[sortField];
+    let bValue = b[sortField];
     
-    if (typeof valueA === 'string') {
-      valueA = valueA.toLowerCase();
-      valueB = valueB.toLowerCase();
+    // Handle undefined values
+    if (aValue === undefined) aValue = '';
+    if (bValue === undefined) bValue = '';
+    
+    // Convert to lowercase for string comparison
+    if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+    if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+    
+    // Sort direction
+    if (sortDirection === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
     }
-    
-    if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
-    if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
-    return 0;
   });
 
   // Get sort indicator
   const getSortIndicator = (field) => {
-    if (sortField !== field) return null;
-    return sortDirection === 'asc' ? ' ↑' : ' ↓';
+    if (sortField !== field) return '';
+    return sortDirection === 'asc' ? '↑' : '↓';
   };
 
   // Handle sort
   const handleSort = (field) => {
-    if (field === sortField) {
+    if (sortField === field) {
+      // Toggle direction if same field
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
+      // Set new field and reset direction to asc
       setSortField(field);
       setSortDirection('asc');
     }
@@ -213,307 +244,322 @@ const FacultySubjectList = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-sky-200 via-cyan-100 to-white px-4 pt-28 pb-16 flex flex-col items-center">
-        <div className={`flex flex-col items-center ${fadeIn}`}>
-          <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-4 tracking-tight">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-blue-500">Your Subjects</span>
-          </h1>
-          <p className="text-gray-600 text-lg mb-8 max-w-2xl text-center">
-            Create, manage, and organize all your courses and events in one place.
-          </p>
-          
-          <div className="flex flex-col md:flex-row gap-4 w-full max-w-6xl mb-6">
-            <Link to="/faculty-dashboard" className="bg-gray-100 hover:bg-gray-200 transition-all duration-300 text-gray-700 py-2 px-4 rounded-lg flex items-center justify-center md:justify-start">
+      <div className="min-h-screen bg-background overflow-hidden py-12 px-4 relative">
+        <GradientBackground gradient="from-teal-500/10 via-blue-600/10 to-purple-600/10" />
+        
+        <MorphingBlob 
+          color="bg-teal-500" 
+          size="w-64 h-64" 
+          opacity="opacity-10" 
+          className="absolute top-0 right-0 translate-x-1/4"
+        />
+        <MorphingBlob 
+          color="bg-purple-500" 
+          size="w-96 h-96" 
+          opacity="opacity-10" 
+          className="absolute bottom-0 left-0 -translate-x-1/4"
+        />
+        
+        <motion.div
+          className="relative z-10"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div className="flex flex-col items-center mb-8" variants={itemVariants}>
+            <Link 
+              to="/faculty-dashboard" 
+              className="self-start mb-4 inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-lg transition-colors"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
               </svg>
               Back to Dashboard
             </Link>
-          </div>
-        </div>
-        
-        {/* Create Subject Section */}
-        <div className={`w-full max-w-6xl bg-white rounded-xl shadow-lg p-8 mb-10 ${fadeIn}`}>
-          <h2 className="text-2xl font-bold text-teal-600 mb-6 flex items-center">
-            <PlusIcon />
-            {editingSubject ? 'Edit Subject' : 'Create New Subject'}
-          </h2>
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="subjectName" className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="subjectName"
-                    type="text"
-                    value={subjectName}
-                    onChange={(e) => setSubjectName(e.target.value)}
-                    placeholder="Enter subject name"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 text-gray-800"
-                    disabled={loading}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="subjectCode" className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject Code <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
+            <motion.div className="flex items-center mb-2" variants={itemVariants}>
+              <SubjectsIcon />
+              <h1 className="text-4xl font-extrabold text-center tracking-tight">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-400">Manage Subjects</span>
+              </h1>
+            </motion.div>
+            <motion.p className="text-gray-300 text-lg max-w-2xl text-center" variants={itemVariants}>
+              Create, edit, and manage your subjects and courses.
+            </motion.p>
+          </motion.div>
+
+          <motion.div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8" variants={containerVariants}>
+            {/* Subject Form */}
+            <motion.div className="lg:col-span-1" variants={itemVariants}>
+              <GlassCard className="p-6">
+                <h2 className="text-xl font-bold text-white mb-4">
+                  {editingSubject ? 'Edit Subject' : 'Create New Subject'}
+                </h2>
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-4">
+                    <label className="block text-gray-300 mb-1">Subject Name</label>
                     <input
-                      id="subjectCode"
+                      type="text"
+                      value={subjectName}
+                      onChange={(e) => setSubjectName(e.target.value)}
+                      className="w-full px-4 py-2 bg-white/10 backdrop-blur-sm border border-gray-300/30 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-150 text-white placeholder-gray-400"
+                      placeholder="e.g., Data Structures"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-300 mb-1">Subject Code</label>
+                    <input
                       type="text"
                       value={subjectCode}
-                      onChange={(e) => setSubjectCode(e.target.value.replace(/[^0-9]/g, ''))}
-                      placeholder="Enter subject code (numbers only)"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 text-gray-800"
-                      disabled={loading}
+                      onChange={(e) => setSubjectCode(e.target.value)}
+                      className="w-full px-4 py-2 bg-white/10 backdrop-blur-sm border border-gray-300/30 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-150 text-white placeholder-gray-400"
+                      placeholder="e.g., 123456"
                       required
-                      maxLength={12}
                     />
-                    {subjectCode && (
-                      <div className={`absolute right-3 top-2.5 rounded-full text-xs font-bold ${subjectCode.length >= 6 && subjectCode.length <= 12 ? 'text-green-600' : 'text-red-500'}`}>
-                        {subjectCode.length}/6-12
-                      </div>
+                    <p className="text-xs text-gray-400 mt-1">Must be 6-12 digits</p>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-300 mb-1">Type</label>
+                    <select
+                      value={subjectType}
+                      onChange={(e) => setSubjectType(e.target.value)}
+                      className="w-full px-4 py-2 bg-white/10 backdrop-blur-sm border border-gray-300/30 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-150 text-white"
+                    >
+                      <option value="course">Course</option>
+                      <option value="event">Event</option>
+                    </select>
+                  </div>
+                  {subjectType === 'event' && (
+                    <div className="mb-4">
+                      <label className="flex items-center text-gray-300">
+                        <input
+                          type="checkbox"
+                          checked={attendanceTracking}
+                          onChange={(e) => setAttendanceTracking(e.target.checked)}
+                          className="mr-2 h-4 w-4 text-teal-500 focus:ring-teal-400 rounded"
+                        />
+                        Track Attendance for this Event
+                      </label>
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-3 mt-6">
+                    <motion.button
+                      type="submit"
+                      className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-4 py-2 rounded-lg font-semibold relative overflow-hidden group flex items-center"
+                      disabled={loading}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-teal-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                      <span className="relative z-10 flex items-center">
+                        <PlusIcon />
+                        {editingSubject ? 'Update Subject' : 'Create Subject'}
+                      </span>
+                    </motion.button>
+                    
+                    {editingSubject && (
+                      <motion.button
+                        type="button"
+                        onClick={resetForm}
+                        className="px-4 py-2 border border-gray-300/30 text-gray-300 rounded-lg hover:bg-white/10 transition-colors"
+                        disabled={loading}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        Cancel
+                      </motion.button>
                     )}
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">
-                    <span className="font-medium">Required:</span> Between 6-12 digits (numbers only)
-                  </p>
-                  {subjectCode && subjectCode.length < 6 && (
-                    <p className="mt-1 text-xs text-red-500">Code is too short (minimum 6 digits)</p>
+                  
+                  {error && (
+                    <motion.div 
+                      className="mt-4 p-3 bg-red-500/20 backdrop-blur-sm border border-red-300/30 text-red-300 rounded-lg"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {error}
+                    </motion.div>
                   )}
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="subjectType" className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject Type
-                  </label>
-                  <select
-                    id="subjectType"
-                    value={subjectType}
-                    onChange={(e) => setSubjectType(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 text-gray-800"
-                    disabled={loading}
-                  >
-                    <option value="course">Regular Course</option>
-                    <option value="event">Event/Special Session</option>
-                  </select>
-                </div>
-                
-                {subjectType === 'event' && (
-                  <div className="flex items-center">
-                    <input
-                      id="attendanceTracking"
-                      type="checkbox"
-                      checked={attendanceTracking}
-                      onChange={(e) => setAttendanceTracking(e.target.checked)}
-                      className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
-                      disabled={loading}
-                    />
-                    <label htmlFor="attendanceTracking" className="ml-2 block text-sm text-gray-700">
-                      Track attendance for this event
-                    </label>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex gap-2 mt-4">
-                <button
-                  type="submit"
-                  className={`bg-gradient-to-r from-teal-500 to-teal-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-teal-600 hover:to-teal-700 transition flex-1 ${pulseAnimation}`}
-                  disabled={loading}
-                >
-                  {loading ? 
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Processing...
-                    </span> : editingSubject ? 'Update Subject' : 'Create Subject'}
-                </button>
-                
-                {editingSubject && (
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-400 transition"
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                )}
-              </div>
-            </form>
-            {error && (
-              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md mt-4 animate-fadeIn">
-                <div className="flex items-center">
-                  <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  <div>
-                    <p className="font-medium">Error</p>
-                    <p>{error}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-            {success && (
-              <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md mt-4 animate-fadeIn">
-                <div className="flex items-center">
-                  <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <p className="font-medium">{success}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Subjects List Section */}
-        <div className={`w-full max-w-6xl bg-white rounded-xl shadow-lg p-8 mb-10 ${slideIn}`}>
-          <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <h2 className="text-2xl font-bold text-teal-600 flex items-center">
-              <SubjectsIcon className="h-6 w-6 mr-2" />
-              Your Subjects
-            </h2>
+                  
+                  {success && (
+                    <motion.div 
+                      className="mt-4 p-3 bg-green-500/20 backdrop-blur-sm border border-green-300/30 text-green-300 rounded-lg"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {success}
+                    </motion.div>
+                  )}
+                </form>
+              </GlassCard>
+            </motion.div>
             
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search subjects..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 text-gray-800 w-full md:w-64"
-                />
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              
-              <div className="flex rounded-lg overflow-hidden border border-gray-300">
-                <button 
-                  onClick={() => setActiveTab('all')} 
-                  className={`px-4 py-2 font-medium ${activeTab === 'all' ? 'bg-teal-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
-                >
-                  All
-                </button>
-                <button 
-                  onClick={() => setActiveTab('course')} 
-                  className={`px-4 py-2 font-medium ${activeTab === 'course' ? 'bg-teal-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
-                >
-                  Courses
-                </button>
-                <button 
-                  onClick={() => setActiveTab('event')} 
-                  className={`px-4 py-2 font-medium ${activeTab === 'event' ? 'bg-teal-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
-                >
-                  Events
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          {loading && !subjects.length ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
-            </div>
-          ) : sortedSubjects.length === 0 ? (
-            <div className="bg-gray-50 rounded-lg p-8 text-center">
-              <SubjectsIcon />
-              <p className="text-gray-600 mt-2">
-                {subjects.length === 0 ? 
-                  "You haven't created any subjects yet." : 
-                  "No subjects match your search criteria."}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm text-gray-800 animate-fadeIn">
-                <thead>
-                  <tr className="bg-gradient-to-r from-teal-400 to-cyan-400 text-white">
-                    <th 
-                      className="px-6 py-4 font-semibold cursor-pointer hover:bg-teal-500 transition"
-                      onClick={() => handleSort('name')}
-                    >
-                      Name {getSortIndicator('name')}
-                    </th>
-                    <th 
-                      className="px-6 py-4 font-semibold cursor-pointer hover:bg-teal-500 transition"
-                      onClick={() => handleSort('code')}
-                    >
-                      Code {getSortIndicator('code')}
-                    </th>
-                    <th 
-                      className="px-6 py-4 font-semibold cursor-pointer hover:bg-teal-500 transition"
-                      onClick={() => handleSort('type')}
-                    >
-                      Type {getSortIndicator('type')}
-                    </th>
-                    <th className="px-6 py-4 font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {sortedSubjects.map((subject) => (
-                    <tr key={subject._id} className="hover:bg-gray-50 transition animate-fadeIn">
-                      <td className="px-6 py-4">{subject.name}</td>
-                      <td className="px-6 py-4 font-medium">{subject.code || 'N/A'}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 ${subject.type === 'event' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'} rounded-full font-medium`}>
-                          {subject.type === 'event' ? 'Event' : 'Course'}
-                          {subject.type === 'event' && subject.attendanceTracking && ' (Attendance)'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleEdit(subject)}
-                            className="text-blue-600 hover:text-blue-800 hover:underline transition"
-                            disabled={loading}
+            {/* Subject List */}
+            <motion.div className="lg:col-span-2" variants={itemVariants}>
+              <GlassCard className="p-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white mb-4 md:mb-0">Your Subjects</h2>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    {/* Type Filter Tabs */}
+                    <div className="flex bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden">
+                      <button
+                        className={`px-4 py-2 ${activeTab === 'all' ? 'bg-teal-500 text-white' : 'text-gray-300 hover:bg-white/10'}`}
+                        onClick={() => setActiveTab('all')}
+                      >
+                        All
+                      </button>
+                      <button
+                        className={`px-4 py-2 ${activeTab === 'courses' ? 'bg-teal-500 text-white' : 'text-gray-300 hover:bg-white/10'}`}
+                        onClick={() => setActiveTab('courses')}
+                      >
+                        Courses
+                      </button>
+                      <button
+                        className={`px-4 py-2 ${activeTab === 'events' ? 'bg-teal-500 text-white' : 'text-gray-300 hover:bg-white/10'}`}
+                        onClick={() => setActiveTab('events')}
+                      >
+                        Events
+                      </button>
+                    </div>
+                    
+                    {/* Search */}
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search subjects..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full px-4 py-2 pl-10 bg-white/10 backdrop-blur-sm border border-gray-300/30 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-150 text-white placeholder-gray-400"
+                      />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {loading && subjects.length === 0 ? (
+                  <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
+                  </div>
+                ) : subjects.length === 0 ? (
+                  <div className="bg-white/5 backdrop-blur-sm rounded-lg p-8 text-center">
+                    <p className="text-gray-300 mb-4">No subjects found. Create your first subject!</p>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  </div>
+                ) : filteredSubjects.length === 0 ? (
+                  <div className="bg-white/5 backdrop-blur-sm rounded-lg p-8 text-center">
+                    <p className="text-gray-300">No subjects match your search criteria.</p>
+                  </div>
+                ) : (
+                  <div className="bg-white/5 backdrop-blur-sm rounded-lg overflow-hidden">
+                    <table className="min-w-full text-sm text-gray-200">
+                      <thead>
+                        <tr className="bg-gradient-to-r from-teal-500/30 to-cyan-500/30 text-white">
+                          <th 
+                            className="px-6 py-4 font-semibold cursor-pointer hover:bg-teal-500/40 transition-colors"
+                            onClick={() => handleSort('name')}
                           >
-                            Edit
-                          </button>
-                          {deleteConfirm === subject._id ? (
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => handleDelete(subject._id)}
-                                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded transition"
-                                disabled={loading}
-                              >
-                                Confirm
-                              </button>
-                              <button
-                                onClick={() => setDeleteConfirm(null)}
-                                className="px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded transition"
-                                disabled={loading}
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => handleDelete(subject._id)}
-                              className="text-red-600 hover:text-red-800 hover:underline transition"
-                              disabled={loading}
-                            >
-                              Delete
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                            Name {getSortIndicator('name')}
+                          </th>
+                          <th 
+                            className="px-6 py-4 font-semibold cursor-pointer hover:bg-teal-500/40 transition-colors"
+                            onClick={() => handleSort('code')}
+                          >
+                            Code {getSortIndicator('code')}
+                          </th>
+                          <th 
+                            className="px-6 py-4 font-semibold cursor-pointer hover:bg-teal-500/40 transition-colors"
+                            onClick={() => handleSort('type')}
+                          >
+                            Type {getSortIndicator('type')}
+                          </th>
+                          <th className="px-6 py-4 font-semibold">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-700/30">
+                        {sortedSubjects.map((subject, i) => (
+                          <motion.tr 
+                            key={subject._id} 
+                            custom={i}
+                            variants={tableRowVariants}
+                            className="hover:bg-white/5 transition-colors"
+                          >
+                            <td className="px-6 py-4">{subject.name}</td>
+                            <td className="px-6 py-4 font-medium">{subject.code || 'N/A'}</td>
+                            <td className="px-6 py-4">
+                              <span className={`px-3 py-1 rounded-full font-medium ${
+                                subject.type === 'event' 
+                                  ? 'bg-purple-500/20 text-purple-300' 
+                                  : 'bg-green-500/20 text-green-300'
+                              }`}>
+                                {subject.type === 'event' ? 'Event' : 'Course'}
+                                {subject.type === 'event' && subject.attendanceTracking && ' (Attendance)'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex space-x-2">
+                                <motion.button
+                                  onClick={() => handleEdit(subject)}
+                                  className="px-3 py-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition-colors"
+                                  disabled={loading}
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                >
+                                  Edit
+                                </motion.button>
+                                {deleteConfirm === subject._id ? (
+                                  <div className="flex space-x-2">
+                                    <motion.button
+                                      onClick={() => handleDelete(subject._id)}
+                                      className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors"
+                                      disabled={loading}
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
+                                    >
+                                      Confirm
+                                    </motion.button>
+                                    <motion.button
+                                      onClick={() => setDeleteConfirm(null)}
+                                      className="px-3 py-1 bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 rounded-lg transition-colors"
+                                      disabled={loading}
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
+                                    >
+                                      Cancel
+                                    </motion.button>
+                                  </div>
+                                ) : (
+                                  <motion.button
+                                    onClick={() => setDeleteConfirm(subject._id)}
+                                    className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-colors"
+                                    disabled={loading}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    Delete
+                                  </motion.button>
+                                )}
+                              </div>
+                            </td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </GlassCard>
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </div>
     </>
   );

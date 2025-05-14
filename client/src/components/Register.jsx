@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import customAxios from '../utils/axios';
 import axios from 'axios'; // Import the original axios library
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import {
+  FadeIn,
+  SlideInUp,
+  GlassCard,
+  GradientBackground,
+  MorphingBlob
+} from './AnimationUtils';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -86,22 +94,80 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-100 via-cyan-50 to-sky-50 flex items-center justify-center px-4 py-12">
-      <div className="bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl shadow-xl p-8 w-full max-w-md border border-white/30 transition-all duration-300 animate-fadeIn hover:shadow-2xl">
+    <div className="min-h-screen bg-background overflow-hidden flex items-center justify-center px-4 py-12 relative">
+      {/* Animated Gradient Background */}
+      <GradientBackground gradient="from-teal-500/10 via-blue-600/10 to-purple-600/10" />
+      <MorphingBlob 
+        color="bg-teal-500" 
+        size="w-64 h-64" 
+        opacity="opacity-10" 
+        className="absolute top-0 right-0 translate-x-1/4"
+      />
+      <MorphingBlob 
+        color="bg-purple-500" 
+        size="w-96 h-96" 
+        opacity="opacity-10" 
+        className="absolute bottom-0 left-0 -translate-x-1/4"
+      />
+      
+      <FadeIn className="z-10">
+        <motion.div 
+          className="relative"
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          whileHover={{ scale: 1.01, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+        >
+          <GlassCard className="p-8 w-full max-w-md border border-white/30 transition-all duration-300">
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-teal-400 to-cyan-500 flex items-center justify-center shadow-lg animate-slideInUp">
+          <motion.div 
+            className="w-16 h-16 rounded-full bg-gradient-to-r from-teal-400 to-cyan-500 flex items-center justify-center shadow-lg"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.2 }}
+            whileHover={{ scale: 1.1, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1)" }}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
               <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6z" />
               <path d="M16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
             </svg>
-          </div>
+          </motion.div>
         </div>
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-2 animate-fadeIn">Register</h1>
-        <p className="text-center text-gray-500 mb-6 animate-fadeIn">Create your account to get started</p>
-        {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 animate-fadeIn">{error}</div>}
-        <form onSubmit={handleSubmit} className="space-y-5 animate-fadeIn">
+        <motion.h1 
+          className="text-3xl font-bold text-center text-white mb-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          Register
+        </motion.h1>
+        <motion.p 
+          className="text-center text-gray-200 mb-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          Create your account to get started
+        </motion.p>
+        {error && (
+          <motion.div 
+            className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          >
+            {error}
+          </motion.div>
+        )}
+        <motion.form 
+          onSubmit={handleSubmit} 
+          className="space-y-5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
           <div className="space-y-1">
-            <label className="block text-gray-700 text-sm font-medium">Full Name</label>
+            <label className="block text-white text-sm font-medium">Full Name</label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -120,7 +186,7 @@ const Register = () => {
           </div>
           
           <div className="space-y-1">
-            <label className="block text-gray-700 text-sm font-medium">Email Address</label>
+            <label className="block text-white text-sm font-medium">Email Address</label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -138,14 +204,14 @@ const Register = () => {
                 required
               />
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-300">
               {formData.role === 'student' ? 'Must end with @mits.in' : 
                formData.role === 'teacher' ? 'Must end with @mitsgwalior.in' : ''}
             </p>
           </div>
           
           <div className="space-y-1">
-            <label className="block text-gray-700 text-sm font-medium">Password</label>
+            <label className="block text-white text-sm font-medium">Password</label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -162,10 +228,10 @@ const Register = () => {
                 minLength={6}
               />
             </div>
-            <p className="text-xs text-gray-500">Minimum 6 characters required</p>
+            <p className="text-xs text-gray-300">Minimum 6 characters required</p>
           </div>
           <div className="space-y-1">
-            <label className="block text-gray-700 text-sm font-medium">
+            <label className="block text-white text-sm font-medium">
               {formData.role === 'student' ? 'Enrollment Number' : formData.role === 'teacher' ? 'Faculty ID' : 'Admin ID'}
             </label>
             <div className="relative group">
@@ -204,16 +270,16 @@ const Register = () => {
               />
             </div>
             {formData.role === 'student' ? (
-              <p className="text-xs text-gray-500">Must start with MCCA (e.g., MCCA24O1058)</p>
+              <p className="text-xs text-gray-300">Must start with MCCA (e.g., MCCA24O1058)</p>
             ) : formData.role === 'teacher' ? (
-              <p className="text-xs text-gray-500">Must start with MSF (e.g., MSF15A876)</p>
+              <p className="text-xs text-gray-300">Must start with MSF (e.g., MSF15A876)</p>
             ) : formData.role === 'admin' ? (
-              <p className="text-xs text-gray-500">Must start with ADM (e.g., ADM001)</p>
+              <p className="text-xs text-gray-300">Must start with ADM (e.g., ADM001)</p>
             ) : null}
           </div>
           
           <div className="space-y-1">
-            <label className="block text-gray-700 text-sm font-medium">Select Role</label>
+            <label className="block text-white text-sm font-medium">Select Role</label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -240,7 +306,7 @@ const Register = () => {
           {/* Semester field only for students */}
           {formData.role === 'student' && (
             <div className="space-y-1 animate-fadeIn">
-              <label className="block text-gray-700 text-sm font-medium">Semester</label>
+              <label className="block text-white text-sm font-medium">Semester</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -256,37 +322,86 @@ const Register = () => {
                   required
                 />
               </div>
-              <p className="text-xs text-gray-500">Enter your current semester (e.g., 1st, 2nd, 3rd)</p>
+              <p className="text-xs text-gray-300">Enter your current semester (e.g., 1st, 2nd, 3rd)</p>
             </div>
           )}
           
-          <button
+          <motion.button
             type="submit"
-            className="w-full mt-6 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50 animate-fadeIn"
+            className="w-full mt-6 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg relative overflow-hidden group"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
           >
-            <div className="flex items-center justify-center">
+            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-teal-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+            <div className="flex items-center justify-center relative z-10">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
               Create Account
             </div>
-          </button>
-        </form>
+          </motion.button>
+        </motion.form>
         
-        <div className="mt-6 text-center animate-fadeIn">
-          <p className="text-gray-600">
+        <motion.div 
+          className="mt-6 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
+          <p className="text-gray-200">
             Already have an account?{' '}
-            <a href="/login" className="text-teal-600 hover:text-teal-500 font-medium transition-colors duration-200">
+            <Link to="/login" className="text-teal-400 hover:text-teal-300 font-medium transition-colors duration-200 relative group">
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-teal-500 group-hover:w-full transition-all duration-300"></span>
               Log in here
-            </a>
+            </Link>
           </p>
-        </div>
-      </div>
-      
-      {/* Animated background elements */}
-      <div className="fixed top-20 left-20 w-64 h-64 bg-cyan-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-      <div className="fixed top-40 right-20 w-72 h-72 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="fixed -bottom-20 left-40 w-80 h-80 bg-sky-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        </motion.div>
+          </GlassCard>
+        </motion.div>
+      </FadeIn>
+      {/* Additional Animated Elements */}
+      <motion.div 
+        className="absolute top-20 left-20 w-64 h-64 bg-cyan-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+        animate={{
+          scale: [1, 1.2, 1],
+          x: [0, 10, 0],
+          y: [0, -10, 0],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          repeatType: "reverse"
+        }}
+      />
+      <motion.div 
+        className="absolute top-40 right-20 w-72 h-72 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+        animate={{
+          scale: [1, 1.1, 1],
+          x: [0, -10, 0],
+          y: [0, 15, 0],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          repeatType: "reverse",
+          delay: 1
+        }}
+      />
+      <motion.div 
+        className="absolute -bottom-20 left-40 w-80 h-80 bg-sky-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+        animate={{
+          scale: [1, 1.3, 1],
+          x: [0, 15, 0],
+          y: [0, 10, 0],
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          repeatType: "reverse",
+          delay: 2
+        }}
+      />
     </div>
   );
 };

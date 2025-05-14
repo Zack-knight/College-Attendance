@@ -2,6 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from '../utils/axios';
 import Navbar from './Navbar';
+import { motion } from 'framer-motion';
+import {
+  FadeIn,
+  SlideInUp,
+  SlideInLeft,
+  SlideInRight,
+  Card3D,
+  GlassCard,
+  GradientBackground,
+  MorphingBlob
+} from './AnimationUtils';
 
 // Import icons
 const DashboardIcon = () => (
@@ -49,10 +60,26 @@ const FacultyDashboard = () => {
   const [sortField, setSortField] = useState('name');
   const [sortDirection, setSortDirection] = useState('asc');
   
-  // Animation classes
-  const fadeIn = "animate-fadeIn";
-  const slideIn = "animate-slideInRight";
-  const pulseAnimation = "hover:animate-pulse";
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.3
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  };
   
   // Helper to get a random animation delay for staggered animations
   const getRandomDelay = () => {
@@ -206,153 +233,199 @@ const FacultyDashboard = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-sky-200 via-cyan-100 to-white px-4 pt-28 pb-16 flex flex-col items-center">
-        <div className={`${fadeIn} w-full max-w-7xl`}>
-          <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-6 tracking-tight">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-blue-500">Faculty Dashboard</span>
-          </h1>
-          <p className="text-gray-600 text-lg mb-12 max-w-2xl mx-auto text-center">
-            Manage your courses, mark attendance, and view important student data.  
-          </p>
-        </div>
-
-        {/* Dashboard Cards Section */}
-        <div className={`grid gap-8 w-full max-w-7xl md:grid-cols-2 lg:grid-cols-3 mb-14 ${slideIn}`}>
-          {/* Card 1 - Mark Attendance */}
-          <Link
-            to="/mark-attendance"
-            className={`${fadeIn} ${getRandomDelay()} group bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col items-center transform hover:-translate-y-1 relative overflow-hidden`}
+      <div className="min-h-screen bg-background overflow-hidden py-8 px-4 relative">
+        <GradientBackground gradient="from-teal-500/10 via-blue-600/10 to-purple-600/10" />
+        
+        <MorphingBlob 
+          color="bg-teal-500" 
+          size="w-64 h-64" 
+          opacity="opacity-10" 
+          className="absolute top-0 right-0 translate-x-1/4"
+        />
+        <MorphingBlob 
+          color="bg-purple-500" 
+          size="w-96 h-96" 
+          opacity="opacity-10" 
+          className="absolute bottom-0 left-0 -translate-x-1/4"
+        />
+        
+        <motion.div 
+          className="max-w-7xl mx-auto space-y-8 relative z-10"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.h1 
+            className="text-3xl font-bold text-white mb-2"
+            variants={itemVariants}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-teal-400/5 to-blue-400/5 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
-            <AttendanceIcon />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Mark Attendance</h3>
-            <p className="text-gray-600 text-center">Record attendance for your courses and events.</p>
-            <div className="mt-4 flex">
-              <span className="text-teal-600 font-semibold group-hover:text-teal-700 transition-colors flex items-center">
-                Mark Now
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 group-hover:ml-2 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </div>
-          </Link>
-
-          {/* Card 2 - Attendance Records */}
-          <Link
-            to="/attendance-records"
-            className={`${fadeIn} ${getRandomDelay()} group bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col items-center transform hover:-translate-y-1 relative overflow-hidden`}
+            Faculty Dashboard
+          </motion.h1>
+          <motion.p 
+            className="text-gray-300 mb-8"
+            variants={itemVariants}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-teal-400/5 to-blue-400/5 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
-            <DashboardIcon />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Attendance Records</h3>
-            <p className="text-gray-600 text-center">View and export attendance data for all your courses.</p>
-            <div className="mt-4 flex">
-              <span className="text-teal-600 font-semibold group-hover:text-teal-700 transition-colors flex items-center">
-                View Records
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 group-hover:ml-2 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </div>
-          </Link>
-
-          {/* Card 3 - View Feedback */}
-          <Link
-            to="/feedback-list"
-            className={`${fadeIn} ${getRandomDelay()} group bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col items-center transform hover:-translate-y-1 relative overflow-hidden`}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-teal-400/5 to-blue-400/5 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
-            <FeedbackIcon />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">View Feedback</h3>
-            <p className="text-gray-600 text-center">Review all feedback and notes from your students.</p>
-            <div className="mt-4 flex">
-              <span className="text-teal-600 font-semibold group-hover:text-teal-700 transition-colors flex items-center">
-                View Feedback
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 group-hover:ml-2 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </div>
-          </Link>
-
-          {/* Card 4 - Manage Subjects */}
-          <Link
-            to="/faculty-subjects"
-            className={`${fadeIn} ${getRandomDelay()} group bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col items-center transform hover:-translate-y-1 relative overflow-hidden`}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-teal-400/5 to-blue-400/5 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
-            <SubjectsIcon />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Manage Subjects</h3>
-            <p className="text-gray-600 text-center">Create and manage your courses and events in one place.</p>
-            <div className="mt-4 flex">
-              <span className="text-teal-600 font-semibold group-hover:text-teal-700 transition-colors flex items-center">
-                View Subjects
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 group-hover:ml-2 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        {/* Quick Actions Section */}
-        <div className={`w-full max-w-7xl bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl shadow-lg p-8 text-white mb-10 ${slideIn}`}>
-          <h2 className="text-2xl font-bold mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <Link to="/mark-attendance" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-4 rounded-lg flex flex-col items-center transition-all duration-300 hover:transform hover:scale-105">
-              <AttendanceIcon />
-              <span className="font-medium">Mark Attendance</span>
-            </Link>
-            <Link to="/attendance-records" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-4 rounded-lg flex flex-col items-center transition-all duration-300 hover:transform hover:scale-105">
-              <DashboardIcon />
-              <span className="font-medium">View Records</span>
-            </Link>
-            <Link to="/feedback-list" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-4 rounded-lg flex flex-col items-center transition-all duration-300 hover:transform hover:scale-105">
-              <FeedbackIcon />
-              <span className="font-medium">View Feedback</span>
-            </Link>
-            <Link to="/faculty-subjects" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-4 rounded-lg flex flex-col items-center transition-all duration-300 hover:transform hover:scale-105">
-              <SubjectsIcon />
-              <span className="font-medium">Manage Subjects</span>
-            </Link>
+            Manage your courses, events, and student attendance
+          </motion.p>
+          
+          {/* Dashboard Cards Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <motion.div variants={itemVariants}>
+            <Card3D>
+              <Link to="/mark-attendance" className="block h-full">
+                <GlassCard className="p-6 h-full">
+                  <div className="flex flex-col items-center text-center h-full">
+                    <AttendanceIcon />
+                    <h2 className="text-xl font-bold text-white mb-2">Mark Attendance</h2>
+                    <p className="text-gray-300 flex-grow">Record student attendance for your courses and events</p>
+                    <motion.span 
+                      className="mt-4 inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg relative overflow-hidden group"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-teal-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <span className="relative z-10">Start Now</span>
+                    </motion.span>
+                  </div>
+                </GlassCard>
+              </Link>
+            </Card3D>
+          </motion.div>
+          
+          <motion.div variants={itemVariants}>
+            <Card3D>
+              <Link to="/attendance-records" className="block h-full">
+                <GlassCard className="p-6 h-full">
+                  <div className="flex flex-col items-center text-center h-full">
+                    <DashboardIcon />
+                    <h2 className="text-xl font-bold text-white mb-2">View Records</h2>
+                    <p className="text-gray-300 flex-grow">Access and analyze attendance records for your subjects</p>
+                    <motion.span 
+                      className="mt-4 inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg relative overflow-hidden group"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-teal-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <span className="relative z-10">View Now</span>
+                    </motion.span>
+                  </div>
+                </GlassCard>
+              </Link>
+            </Card3D>
+          </motion.div>
+          
+          <motion.div variants={itemVariants}>
+            <Card3D>
+              <Link to="/faculty-subjects" className="block h-full">
+                <GlassCard className="p-6 h-full">
+                  <div className="flex flex-col items-center text-center h-full">
+                    <SubjectsIcon />
+                    <h2 className="text-xl font-bold text-white mb-2">Manage Subjects</h2>
+                    <p className="text-gray-300 flex-grow">Create and manage your courses and events</p>
+                    <motion.span 
+                      className="mt-4 inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg relative overflow-hidden group"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-teal-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <span className="relative z-10">Manage</span>
+                    </motion.span>
+                  </div>
+                </GlassCard>
+              </Link>
+            </Card3D>
+          </motion.div>
           </div>
-        </div>
-
-        {/* Additional Information Section */}
-        <div className={`w-full max-w-7xl bg-white rounded-xl shadow-lg p-8 mb-10 ${fadeIn}`}>
-          <h2 className="text-2xl font-bold text-teal-600 mb-6">Faculty Resources</h2>
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Quick Tips</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-600">
-                  <li>Use the <span className="text-teal-600 font-medium">Mark Attendance</span> feature to record student attendance for your courses and events.</li>
-                  <li>View detailed attendance statistics in the <span className="text-teal-600 font-medium">Attendance Records</span> section.</li>
-                  <li>Create and manage your subjects from the <span className="text-teal-600 font-medium">Manage Subjects</span> page.</li>
-                  <li>Check student feedback in the <span className="text-teal-600 font-medium">View Feedback</span> section.</li>
-                </ul>
+          
+          {/* Quick Actions Section */}
+          <motion.div 
+            variants={itemVariants}
+            className="w-full max-w-7xl rounded-xl p-8 text-white mb-10 overflow-hidden relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 opacity-90"></div>
+            <div className="absolute inset-0 backdrop-blur-sm"></div>
+            <div className="relative z-10">
+              <h2 className="text-2xl font-bold mb-6">Quick Actions</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link to="/mark-attendance" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-4 rounded-lg flex flex-col items-center transition-all duration-300">
+                    <AttendanceIcon />
+                    <span className="font-medium">Mark Attendance</span>
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link to="/attendance-records" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-4 rounded-lg flex flex-col items-center transition-all duration-300">
+                    <DashboardIcon />
+                    <span className="font-medium">View Records</span>
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link to="/feedback-list" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-4 rounded-lg flex flex-col items-center transition-all duration-300">
+                    <FeedbackIcon />
+                    <span className="font-medium">View Feedback</span>
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link to="/faculty-subjects" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm p-4 rounded-lg flex flex-col items-center transition-all duration-300">
+                    <SubjectsIcon />
+                    <span className="font-medium">Manage Subjects</span>
+                  </Link>
+                </motion.div>
               </div>
-              
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Recent Updates</h3>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-gray-500 text-sm">May 14, 2025</p>
-                    <p className="text-gray-700">Added subject code field to improve organization</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-sm">May 10, 2025</p>
-                    <p className="text-gray-700">Updated UI for better user experience</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-sm">May 5, 2025</p>
-                    <p className="text-gray-700">Added new attendance tracking features</p>
-                  </div>
+            </div>
+          </motion.div>
+
+          {/* Additional Information Section */}
+          <motion.div variants={itemVariants} className="w-full max-w-7xl mb-10">
+            <GlassCard className="p-8">
+              <h2 className="text-2xl font-bold text-white mb-6">Faculty Resources</h2>
+              <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <motion.div 
+                    whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
+                    className="bg-white/20 backdrop-blur-sm p-6 rounded-lg shadow-md">
+                    <h3 className="text-xl font-semibold text-white mb-3">Quick Tips</h3>
+                    <ul className="list-disc pl-5 space-y-2 text-gray-200">
+                      <li>Use the <span className="text-teal-300 font-medium">Mark Attendance</span> feature to record student attendance for your courses and events.</li>
+                      <li>View detailed attendance statistics in the <span className="text-teal-300 font-medium">Attendance Records</span> section.</li>
+                      <li>Create and manage your subjects from the <span className="text-teal-300 font-medium">Manage Subjects</span> page.</li>
+                      <li>Check student feedback in the <span className="text-teal-300 font-medium">View Feedback</span> section.</li>
+                    </ul>
+                  </motion.div>
+                  
+                  <motion.div 
+                    whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
+                    className="bg-white/20 backdrop-blur-sm p-6 rounded-lg shadow-md">
+                    <h3 className="text-xl font-semibold text-white mb-3">Recent Updates</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-gray-300 text-sm">May 14, 2025</p>
+                        <p className="text-gray-100">Added subject code field to improve organization</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-300 text-sm">May 10, 2025</p>
+                        <p className="text-gray-100">Updated UI for better user experience</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-300 text-sm">May 5, 2025</p>
+                        <p className="text-gray-100">Added new attendance tracking features</p>
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
+            </GlassCard>
+          </motion.div>
+        </motion.div>
       </div>
     </>
   );

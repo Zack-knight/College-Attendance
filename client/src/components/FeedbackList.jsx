@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../utils/axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import Navbar from './Navbar';
+import {
+  FadeIn,
+  SlideInUp,
+  Card3D,
+  GlassCard,
+  GradientBackground,
+  MorphingBlob
+} from './AnimationUtils';
 
 const FeedbackApp = () => {
   const [feedback, setFeedback] = useState([]);
@@ -89,14 +98,30 @@ const FeedbackApp = () => {
   });
 
   return (
-    <motion.div 
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      className="min-h-screen bg-gradient-to-br from-sky-200 via-cyan-100 to-white px-4 pt-28 pb-12"
-    >
-      <motion.div variants={itemVariants} className="max-w-6xl mx-auto mb-8">
-        <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-6 tracking-tight flex flex-col sm:flex-row items-center justify-center">
+    <>
+      <Navbar />
+      <motion.div 
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="min-h-screen bg-background overflow-hidden py-12 px-4 relative"
+      >
+        <GradientBackground gradient="from-teal-500/10 via-blue-600/10 to-purple-600/10" />
+        
+        <MorphingBlob 
+          color="bg-teal-500" 
+          size="w-64 h-64" 
+          opacity="opacity-10" 
+          className="absolute top-0 right-0 translate-x-1/4"
+        />
+        <MorphingBlob 
+          color="bg-purple-500" 
+          size="w-96 h-96" 
+          opacity="opacity-10" 
+          className="absolute bottom-0 left-0 -translate-x-1/4"
+        />
+      <motion.div variants={itemVariants} className="max-w-6xl mx-auto mb-8 relative z-10">
+        <h1 className="text-4xl font-extrabold text-center mb-6 tracking-tight flex flex-col sm:flex-row items-center justify-center">
           <motion.span
             className="inline-block text-white bg-gradient-to-r from-teal-500 to-cyan-500 p-2 rounded-lg shadow-lg mr-3 mb-4 sm:mb-0"
             whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
@@ -106,83 +131,68 @@ const FeedbackApp = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </motion.span>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-cyan-600">Attendance Issue Reports</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-400">Attendance Issue Reports</span>
         </h1>
         
-        <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+        <p className="text-center text-gray-300 mb-8 max-w-2xl mx-auto">
           View and manage all student-reported attendance issues. These reports help identify and resolve discrepancies in attendance records.  
         </p>
 
         {/* Search Bar */}
         <div className="relative max-w-md mx-auto mb-8">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="h-5 w-5 text-teal-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
             </svg>
           </div>
           <input
             type="text"
-            placeholder="Search by student name or message content..."
-            className="pl-10 pr-4 py-2 w-full border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+            placeholder="Search by student name or issue..."
+            className="block w-full pl-10 pr-4 py-2 border border-gray-300/30 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-150 bg-white/10 backdrop-blur-sm text-white placeholder-gray-400"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </motion.div>
 
-      <AnimatePresence mode="wait">
-        {error && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 max-w-3xl mx-auto rounded-r-lg shadow-md"
-          >
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
+      <AnimatePresence>
         {fetching ? (
           <motion.div 
-            key="loading" 
-            variants={itemVariants}
-            className="flex flex-col items-center justify-center space-y-4 py-12"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex justify-center items-center py-12"
           >
-            <motion.div
-              animate={{ 
-                rotate: 360,
-                scale: [1, 1.2, 1] 
-              }}
-              transition={{ 
-                rotate: { duration: 2, repeat: Infinity, ease: "linear" },
-                scale: { duration: 1, repeat: Infinity, ease: "easeInOut" }
-              }}
-              className="h-16 w-16 border-4 border-teal-500 border-t-transparent rounded-full"
-            />
-            <p className="text-gray-600 font-medium">Loading attendance issues...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
+          </motion.div>
+        ) : error ? (
+          <motion.div 
+            variants={itemVariants}
+            className="bg-red-500/20 backdrop-blur-sm border border-red-300/30 text-red-300 px-4 py-3 rounded-lg max-w-3xl mx-auto"
+          >
+            <p>{error}</p>
+            <button 
+              onClick={fetchFeedback}
+              className="mt-2 text-sm font-medium text-red-300 hover:text-red-200 underline"
+            >
+              Try again
+            </button>
           </motion.div>
         ) : feedback.length === 0 ? (
           <motion.div 
             key="empty" 
             variants={cardVariants} 
-            className="max-w-2xl mx-auto bg-white bg-opacity-90 rounded-xl shadow-lg p-8 text-center"
+            className="max-w-2xl mx-auto bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border border-teal-50"
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-teal-50 rounded-full mb-4">
-              <svg className="h-8 w-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
+            <div className="px-6 py-4 bg-gradient-to-r from-teal-500 to-cyan-600 flex justify-between items-center rounded-t-lg">
+              <h2 className="text-white text-lg font-semibold">No Reported Issues</h2>
+              <div className="text-white text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                No issues found
+              </div>
             </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">No Attendance Issues</h2>
-            <p className="text-gray-600">There are currently no attendance issues reported by students.</p>
+            <div className="p-6 text-center">
+              <p className="text-gray-300">There are currently no attendance issues reported by students.</p>
+            </div>
           </motion.div>
         ) : (
           <motion.div
@@ -190,32 +200,23 @@ const FeedbackApp = () => {
             variants={cardVariants}
             className="max-w-6xl mx-auto bg-white bg-opacity-90 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border border-teal-50"
           >
-            <div className="p-6 bg-gradient-to-r from-teal-500 to-cyan-600 flex justify-between items-center">
-              <h2 className="text-white font-semibold flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                  <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-                </svg>
-                {filteredFeedback.length} Reported Issue{filteredFeedback.length !== 1 ? 's' : ''}
-              </h2>
-              {searchTerm && (
-                <div className="text-xs text-white bg-white bg-opacity-20 px-3 py-1 rounded-full">
-                  Filtered results for "{searchTerm}"
-                </div>
-              )}
+            <div className="px-6 py-4 bg-gradient-to-r from-teal-500 to-cyan-600 flex justify-between items-center rounded-t-lg">
+              <h2 className="text-white text-lg font-semibold">All Reported Issues</h2>
+              <div className="text-white text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                {filteredFeedback.length} {filteredFeedback.length === 1 ? 'issue' : 'issues'} found
+              </div>
             </div>
-            
             <div className="overflow-x-auto">
-              <table className="min-w-full table-auto bg-white">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200/20">
+                <thead className="bg-teal-600/30">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">Student</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">Message</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">Date</th>
-                    <th className="px-6 py-3 text-center text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">Student</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">Issue</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">Date</th>
+                    <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-gray-100/20">
                   <AnimatePresence>
                     {filteredFeedback.map((item) => (
                       <motion.tr 
@@ -224,7 +225,7 @@ const FeedbackApp = () => {
                         initial="hidden"
                         animate="visible"
                         exit={{ opacity: 0, x: -100 }}
-                        whileHover={{ backgroundColor: "rgba(240, 253, 250, 0.6)" }}
+                        whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
                         transition={{ duration: 0.2 }}
                       >
                         <td className="px-6 py-4">
@@ -233,24 +234,24 @@ const FeedbackApp = () => {
                               {(item.student?.name || 'U')[0]}
                             </div>
                             <div>
-                              <div className="text-sm font-medium text-gray-900">{item.student?.name || 'Unknown'}</div>
-                              <div className="text-xs text-gray-500">{item.student?.enrollmentNumber || '-'}</div>
+                              <div className="text-sm font-medium text-white">{item.student?.name || 'Unknown'}</div>
+                              <div className="text-xs text-gray-400">{item.student?.enrollmentNumber || '-'}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-gray-700 max-w-xs md:max-w-sm whitespace-normal">{item.message}</div>
+                          <div className="text-sm text-gray-300 max-w-xs md:max-w-sm whitespace-normal">{item.message}</div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-gray-700">{new Date(item.date).toLocaleDateString()}</div>
-                          <div className="text-xs text-gray-500">{new Date(item.date).toLocaleTimeString()}</div>
+                          <div className="text-sm text-gray-300">{new Date(item.date).toLocaleDateString()}</div>
+                          <div className="text-xs text-gray-400">{new Date(item.date).toLocaleTimeString()}</div>
                         </td>
                         <td className="px-6 py-4 text-center">
                           <motion.button
-                            whileHover={{ scale: 1.05, backgroundColor: '#FEE2E2' }}
+                            whileHover={{ scale: 1.05, backgroundColor: 'rgba(239, 68, 68, 0.3)' }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleDelete(item._id)}
-                            className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 font-medium px-3 py-1.5 rounded-md transition-colors duration-200"
+                            className="inline-flex items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 font-medium px-3 py-1.5 rounded-md transition-colors duration-200"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -267,19 +268,21 @@ const FeedbackApp = () => {
             
             {filteredFeedback.length === 0 && searchTerm && (
               <div className="py-8 px-6 text-center">
-                <p className="text-gray-600">No issues found matching "{searchTerm}"</p>
+                <p className="text-gray-300">No issues found matching "{searchTerm}"</p>
                 <button 
                   onClick={() => setSearchTerm('')}
-                  className="mt-2 text-teal-600 hover:text-teal-800 font-medium"
+                  className="mt-2 text-teal-400 hover:text-teal-300 font-medium"
                 >
                   Clear search
                 </button>
               </div>
             )}
+            </GlassCard>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

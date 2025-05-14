@@ -2,6 +2,15 @@ import { useEffect, useState } from 'react';
 import axios from '../utils/axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { jwtDecode } from 'jwt-decode';
+import Navbar from './Navbar';
+import {
+  FadeIn,
+  SlideInUp,
+  Card3D,
+  GlassCard,
+  GradientBackground,
+  MorphingBlob
+} from './AnimationUtils';
 
 const FeedbackApp = () => {
   const [feedback, setFeedback] = useState([]);
@@ -232,308 +241,239 @@ const FeedbackApp = () => {
   };
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      variants={pageTransition}
-      className="min-h-screen bg-gradient-to-br from-sky-200 via-cyan-100 to-white px-4 pt-28 pb-16 flex flex-col items-center"
-    >
-      <motion.h1 
-        variants={itemAnimation}
-        whileHover="hover"
-        className="text-4xl font-extrabold text-center text-gray-800 mb-10"
+    <>
+      <Navbar />
+      <motion.div 
+        className="min-h-screen bg-background overflow-hidden py-12 px-4 relative"
+        initial="hidden"
+        animate="visible"
+        variants={pageTransition}
       >
-        <motion.span
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 10, -10, 0],
-          }}
-          transition={{
-            duration: 0.5,
-            ease: "easeInOut",
-            times: [0, 0.5, 0.8, 1],
-            repeat: Infinity,
-            repeatDelay: 3
-          }}
-          className="inline-block"
-        >
-          📢
-        </motion.span>
-        {" "}
-        <motion.span
-          initial={{ backgroundPosition: "0 0" }}
-          animate={{ backgroundPosition: "200% 0" }}
-          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-          className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 via-pink-500 to-teal-600 bg-[length:200%_100%]"
-        >
-          Attendance Issue Note
-        </motion.span>
-      </motion.h1>
-
-      {/* Student Details */}
-      {studentDetails && (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8 w-full max-w-2xl bg-white bg-opacity-95 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-teal-100 relative overflow-hidden"
-        >
-          <motion.div 
-            className="absolute inset-0 bg-gradient-to-r from-cyan-50 to-teal-50 opacity-50"
-            animate={{ opacity: [0.3, 0.5, 0.3] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <h3 className="text-lg font-semibold text-teal-700 mb-3 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-            </svg>
-            Student Information
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-teal-50 p-3 rounded-lg">
-              <p className="text-xs text-teal-600 uppercase font-semibold">Name</p>
-              <p className="text-gray-800 font-medium">{studentDetails.name}</p>
-            </div>
-            <div className="bg-cyan-50 p-3 rounded-lg">
-              <p className="text-xs text-cyan-600 uppercase font-semibold">Enrollment No.</p>
-              <p className="text-gray-800 font-medium">{studentDetails.enrollmentNumber}</p>
-            </div>
-            <div className="bg-teal-50 p-3 rounded-lg">
-              <p className="text-xs text-teal-600 uppercase font-semibold">Semester</p>
-              <p className="text-gray-800 font-medium">{studentDetails.semester}</p>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Feedback Form */}
-      <motion.form
-        variants={formAnimation}
-        onSubmit={handleSubmit}
-        className="bg-white bg-opacity-90 backdrop-blur-md p-8 rounded-3xl shadow-xl w-full max-w-2xl mb-12 relative overflow-hidden"
-        whileHover={{
-          boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
-          translateY: -5
-        }}
-      >
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-teal-100 to-pink-100 opacity-50"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3]
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-
-        <motion.h2 
-          variants={itemAnimation}
-          className="text-2xl font-semibold text-gray-800 mb-4 relative"
-        >
-          Submit Your Attendance Issue
-        </motion.h2>
+        <GradientBackground gradient="from-teal-500/10 via-blue-600/10 to-purple-600/10" />
         
-        <AnimatePresence mode="wait">
-          {error && (
-            <motion.div
-              variants={messageAnimation}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="relative"
-            >
-              <motion.p
-                animate={{
-                  x: [-4, 4, -2, 2, 0],
-                  transition: { duration: 0.5 }
-                }}
-                className="text-red-500 mb-4 bg-red-50 p-3 rounded-lg border border-red-200"
+        <MorphingBlob 
+          color="bg-teal-500" 
+          size="w-64 h-64" 
+          opacity="opacity-10" 
+          className="absolute top-0 right-0 translate-x-1/4"
+        />
+        <MorphingBlob 
+          color="bg-purple-500" 
+          size="w-96 h-96" 
+          opacity="opacity-10" 
+          className="absolute bottom-0 left-0 -translate-x-1/4"
+        />
+        <motion.h1 
+          className="text-4xl md:text-5xl font-extrabold text-center mb-2 tracking-tight"
+          variants={itemAnimation}
+        >
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-400">Student Feedback</span>
+        </motion.h1>
+        <motion.p 
+          className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto text-center"
+          variants={itemAnimation}
+        >
+          {isAdmin ? 'View and manage student feedback' : 'Share your thoughts, issues, or suggestions'}
+        </motion.p>
+        {/* Student Details */}
+        {studentDetails && (
+          <motion.div 
+            className="bg-white/10 backdrop-blur-sm shadow-md rounded-lg overflow-hidden"
+            variants={itemAnimation}
+          >
+            <table className="min-w-full divide-y divide-gray-200/20">
+              <tbody className="divide-y divide-gray-200/20">
+                <tr>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-teal-400 to-cyan-400 text-white flex items-center justify-center font-bold mr-3">
+                        {(studentDetails.name || 'U')[0]}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-white">{studentDetails.name || 'Unknown'}</div>
+                        <div className="text-xs text-gray-400">{studentDetails.enrollmentNumber || '-'}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-300 max-w-md whitespace-normal">{studentDetails.semester}</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </motion.div>
+        )}
+        {/* Feedback Form */}
+        <motion.form 
+          onSubmit={handleSubmit} 
+          className="space-y-6"
+          variants={itemAnimation}
+        >
+          <motion.h2 
+            className="text-2xl font-bold text-white mb-6"
+            variants={itemAnimation}
+          >
+            Submit Your Feedback
+          </motion.h2>
+          <AnimatePresence mode="wait">
+            {error && (
+              <motion.div
+                key="error-message"
+                variants={messageAnimation}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="mt-6 p-4 bg-red-500/20 backdrop-blur-sm border border-red-300/30 rounded-lg text-red-300 flex items-center"
               >
-                {error}
-              </motion.p>
-            </motion.div>
-          )}
-          {successMessage && (
-            <motion.div
-              variants={messageAnimation}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="relative"
-            >
-              <motion.p
-                animate={{
-                  scale: [1, 1.05, 1],
-                  transition: { duration: 0.3 }
-                }}
-                className="text-green-500 mb-4 bg-green-50 p-3 rounded-lg border border-green-200"
+                <motion.p
+                  animate={{
+                    x: [-4, 4, -2, 2, 0],
+                    transition: { duration: 0.5 }
+                  }}
+                  className="text-red-500 mb-4 bg-red-50 p-3 rounded-lg border border-red-200"
+                >
+                  {error}
+                </motion.p>
+              </motion.div>
+            )}
+            {successMessage && (
+              <motion.div
+                key="success-message"
+                variants={messageAnimation}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="mt-6 p-4 bg-green-500/20 backdrop-blur-sm border border-green-300/30 rounded-lg text-green-300 flex items-center"
               >
-                {successMessage}
-              </motion.p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <motion.div variants={itemAnimation} className="mb-6 relative">
-          <label htmlFor="message" className="block mb-2 font-medium text-gray-700 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-teal-500" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
-            </svg>
-            Describe Your Attendance Issue
-          </label>
-          <div className="relative rounded-xl overflow-hidden group">
-            <motion.div 
-              className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ height: 'calc(100% - 2px)', width: 'calc(100% - 2px)', top: '1px', left: '1px', borderRadius: 'calc(0.5rem - 2px)' }}
-            />
-            <motion.textarea
-              whileFocus={{
-                scale: 1.01,
-                boxShadow: "0 0 20px rgba(45, 212, 191, 0.3)"
-              }}
+                <motion.p
+                  animate={{
+                    scale: [1, 1.05, 1],
+                    transition: { duration: 0.3 }
+                  }}
+                  className="text-green-500 mb-4 bg-green-50 p-3 rounded-lg border border-green-200"
+                >
+                  {successMessage}
+                </motion.p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <motion.div variants={itemAnimation}>
+            <label htmlFor="message" className="block text-sm font-medium text-white mb-1">Your Message</label>
+            <textarea
               id="message"
+              name="message"
+              rows="5"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:border-teal-400 text-gray-800 bg-white transition-all duration-200 relative z-10"
-              placeholder="Please provide details about the attendance issue you're facing..."
-              rows={5}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-transparent resize-none bg-white/10 backdrop-blur-sm text-white placeholder-gray-400"
+              placeholder="Describe your issue or suggestion in detail..."
               required
-            />
-          </div>
+            ></textarea>
+          </motion.div>
           <p className="mt-2 text-sm text-gray-500">Be specific about the date, subject, and nature of the issue.</p>
-        </motion.div>
-
-        <motion.div className="flex justify-between items-center">
-          <motion.button
-            variants={buttonAnimation}
-            initial="rest"
-            whileHover="hover"
-            whileTap="tap"
-            type="submit"
-            disabled={loading}
-            className={`relative bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-semibold px-8 py-3 rounded-xl shadow-lg transition-all ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            <div className="flex items-center justify-center">
-              {loading ? (
-                <>
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
-                  />
-                  <span>Processing...</span>
-                </>
-              ) : (
-                <>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>Submit Issue</span>
-                </>
-              )}
-            </div>
-            {!loading && (
-              <motion.div
-                className="absolute inset-0 bg-white rounded-xl"
-                initial={{ scale: 0, opacity: 0 }}
-                whileHover={{
-                  scale: 1.05,
-                  opacity: 0.2,
-                  transition: { duration: 0.3 }
-                }}
-              />
-            )}
-          </motion.button>
-          
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-sm text-gray-500 italic"
-          >
-            Your issue will be reviewed by faculty
-          </motion.p>
-        </motion.div>
-      </motion.form>
-
-      {/* Feedback List - Only shown to admin users */}
-      <AnimatePresence mode="wait">
-        {isAdmin && (
-          <motion.div
-            variants={listAnimation}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            className="w-full max-w-5xl"
-          >
-            <motion.h2 
-              variants={itemAnimation}
-              className="text-2xl font-semibold text-gray-800 mb-4 flex items-center"
+          <motion.div className="flex justify-end" variants={itemAnimation}>
+            <motion.button
+              type="submit"
+              disabled={loading}
+              variants={buttonAnimation}
+              initial="rest"
+              whileHover="hover"
+              whileTap="tap"
+              className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 py-3 rounded-lg font-semibold relative overflow-hidden group"
             >
-              <motion.span
-                className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white p-2 rounded-lg mr-3 shadow-md flex items-center justify-center"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </motion.span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-cyan-600">
-                All Attendance Issues
-              </span>
-            </motion.h2>
-            
-            {fetching ? (
-              <motion.div 
-                className="flex justify-center items-center py-8"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <motion.div
-                  animate={{
-                    rotate: 360,
-                    scale: [1, 1.2, 1],
-                  }}
-                  transition={{
-                    rotate: {
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: "linear"
-                    },
-                    scale: {
-                      duration: 1,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }
-                  }}
-                  className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full"
-                />
-              </motion.div>
-            ) : feedback.length === 0 ? (
-              <motion.div 
-                variants={itemAnimation}
-                className="text-center py-12 px-6 bg-gradient-to-br from-white to-teal-50 rounded-xl shadow-md flex flex-col items-center"
-              >
-                <div className="bg-teal-100 p-4 rounded-full mb-4 text-teal-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-teal-700 mb-2">No Issues Reported</h3>
-                <p className="text-gray-600 max-w-md">
-                  There are currently no attendance issues reported by students. When students submit issues, they will appear here for review.
-                </p>
-              </motion.div>
-            ) : (
-              <motion.div
-                variants={itemAnimation}
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-teal-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+              <span className="relative z-10">{loading ? 'Submitting...' : 'Submit Feedback'}</span>
+            </motion.button>
+          </motion.div>
+        </motion.form>
+        {/* Feedback List - Only shown to admin users */}
+        <AnimatePresence>
+          {isAdmin && (
+            <motion.div
+              key="feedback-list"
+              variants={listAnimation}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="w-full max-w-lg mb-12"
+            >
+              <GlassCard className="p-8">
+                <motion.h2 
+                  className="text-2xl font-bold text-white mb-4 flex items-center"
+                  variants={itemAnimation}
+                >
+                  <motion.span
+                    className="bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-400"
+                  >
+                    All Attendance Issues
+                  </motion.span>
+                </motion.h2>
+                {fetching ? (
+                  <motion.div 
+                    className="flex justify-center items-center h-64"
+                    variants={itemAnimation}
+                  >
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
+                  </motion.div>
+                ) : feedback.length === 0 ? (
+                  <motion.div 
+                    className="p-6 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-gray-300 text-center"
+                    variants={itemAnimation}
+                  >
+                    No feedback entries found.
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    variants={itemAnimation}
+                    className="overflow-hidden backdrop-blur-md rounded-2xl shadow-xl border border-teal-100"
+                    whileHover={{
+                      boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <div className="bg-gradient-to-r from-teal-500 to-cyan-600 px-6 py-4 flex justify-between items-center">
+                      <h3 className="text-white font-semibold flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                          <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                        </svg>
+                        {feedback.length} Reported Issue{feedback.length !== 1 ? 's' : ''}
+                      </h3>
+                      <div className="text-xs text-white bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                        Last updated: {new Date().toLocaleTimeString()}
+                      </div>
+                    </div>
+                    <table className="min-w-full bg-white bg-opacity-95 table-auto">
+                      <thead className="bg-teal-600/30">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">
+                            Student
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">
+                            Issue Details
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">
+                            Date Reported
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100/20">
+                        <AnimatePresence>
+                          {feedback.map((item, index) => (
+                            <motion.tr
+                              key={item._id}
+                              variants={itemAnimation}
+                              initial="hidden"
+                              animate="visible"
+                              exit="exit"
+                              custom={index}
+                              whileHover={{
+                                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                                transition: { duration: 0.2 }
+                              }}
+                              className="relative overflow-hidden"
                 className="overflow-hidden backdrop-blur-md rounded-2xl shadow-xl border border-teal-100"
                 whileHover={{
                   boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
@@ -552,23 +492,23 @@ const FeedbackApp = () => {
                   </div>
                 </div>
                 <table className="min-w-full bg-white bg-opacity-95 table-auto">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-teal-600/30">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">
                         Student
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">
                         Issue Details
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">
                         Date Reported
                       </th>
-                      <th className="px-6 py-3 text-center text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">
+                      <th className="px-6 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider border-b border-white/20">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100/20">
                     <AnimatePresence>
                       {feedback.map((item, index) => (
                         <motion.tr
@@ -579,7 +519,7 @@ const FeedbackApp = () => {
                           exit="exit"
                           custom={index}
                           whileHover={{
-                            backgroundColor: "rgba(240, 253, 250, 0.6)",
+                            backgroundColor: "rgba(255, 255, 255, 0.1)",
                             transition: { duration: 0.2 }
                           }}
                           className="relative overflow-hidden"
@@ -590,17 +530,17 @@ const FeedbackApp = () => {
                                 {(item.student?.name || 'U')[0]}
                               </div>
                               <div>
-                                <div className="text-sm font-medium text-gray-900">{item.student?.name || 'Unknown'}</div>
-                                <div className="text-xs text-gray-500">{item.student?.enrollmentNumber || '-'}</div>
+                                <div className="text-sm font-medium text-white">{item.student?.name || 'Unknown'}</div>
+                                <div className="text-xs text-gray-400">{item.student?.enrollmentNumber || '-'}</div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-700 max-w-md whitespace-normal">{item.message}</div>
+                            <div className="text-sm text-gray-300 max-w-md whitespace-normal">{item.message}</div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-700">{new Date(item.date).toLocaleDateString()}</div>
-                            <div className="text-xs text-gray-500">{new Date(item.date).toLocaleTimeString()}</div>
+                            <div className="text-sm text-gray-300">{new Date(item.date).toLocaleDateString()}</div>
+                            <div className="text-xs text-gray-400">{new Date(item.date).toLocaleTimeString()}</div>
                           </td>
                           <td className="px-6 py-4 text-center">
                             <motion.button
@@ -609,7 +549,7 @@ const FeedbackApp = () => {
                               whileHover="hover"
                               whileTap="tap"
                               onClick={() => handleDelete(item._id)}
-                              className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 font-medium px-3 py-1.5 rounded-md transition-colors duration-200"
+                              className="inline-flex items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 font-medium px-3 py-1.5 rounded-md transition-colors duration-200"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -624,10 +564,13 @@ const FeedbackApp = () => {
                 </table>
               </motion.div>
             )}
+            </GlassCard>
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </motion.div>
+    </>
   );
 };
 
