@@ -6,9 +6,13 @@ import FeedbackForm from './components/FeedbackForm';
 import FeedbackList from './components/FeedbackList';
 import MarkAttendance from './components/MarkAttendance';
 import AttendanceRecords from './components/AttendanceRecords';
+import StudentAttendanceDetail from './components/StudentAttendanceDetail';
 import UserDashboard from './components/UserDashboard';
 import FacultyDashboard from './components/FacultyDashboard';
+import FacultySubjectList from './components/FacultySubjectList';
 import AdminDashboard from './components/AdminDashboard';
+import UserList from './components/UserList';
+import AdminSubjectList from './components/AdminSubjectList';
 import Home from './components/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar'; 
@@ -70,10 +74,42 @@ const App = () => {
           }
         />
         <Route
+          path="/faculty-subjects"
+          element={
+            <ProtectedRoute roles={['teacher']}>
+              <FacultySubjectList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin-dashboard"
           element={
             <ProtectedRoute roles={['admin']}>
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user-list"
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <UserList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin-subjects"
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <AdminSubjectList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student-attendance/:studentId/:subjectId?"
+          element={
+            <ProtectedRoute roles={['teacher', 'admin']}>
+              <StudentAttendanceDetail />
             </ProtectedRoute>
           }
         />

@@ -42,14 +42,27 @@ const MarkAttendance = () => {
         ]);
         setSubjects(subjectsRes.data);
         setStudents(studentsRes.data);
-      } catch {
-        setError('Failed to fetch subjects or students.');
+        
+        // If we have subjects, preselect the first one
+        if (subjectsRes.data && subjectsRes.data.length > 0) {
+          // Find first valid subject for the current role
+          const validSubject = role === 'admin' ?
+            subjectsRes.data.find(s => s.type === 'course' || (s.type === 'event' && s.attendanceTracking)) :
+            subjectsRes.data.find(s => s.type !== 'event');
+            
+          if (validSubject) {
+            setSelectedSubject(validSubject._id);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError(err.response?.data?.error || 'Failed to fetch subjects or students.');
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, []);
+  }, [role]);
 
   // Handle attendance change
   const handleAttendanceChange = (studentId, status) => {
@@ -116,8 +129,12 @@ const MarkAttendance = () => {
         (s.type === 'event' && s.attendanceTracking)
     );
   } else {
-    // Faculty: show only their own courses (assuming backend returns only their courses)
-    filteredSubjects = subjects.filter((s) => s.type !== 'event');
+    // Faculty: show their own courses AND events with attendanceTracking=true
+    filteredSubjects = subjects.filter(
+      (s) => 
+        (s.type === 'course') || 
+        (s.type === 'event' && s.attendanceTracking === true)
+    );
   }
 
   return (
