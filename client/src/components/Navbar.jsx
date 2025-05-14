@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { useState, useEffect } from 'react';
 
@@ -9,19 +9,49 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Set role from token
+  // Check token validity and update state on component mount and route changes
   useEffect(() => {
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        setRole(decoded.role);
-      } catch (error) {
-        console.error('Error decoding token:', error);
+    const checkAuthStatus = () => {
+      // Check if token exists and is valid
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        try {
+          const decoded = jwtDecode(storedToken);
+          
+          // Check if token is expired
+          const currentTime = Date.now() / 1000;
+          if (decoded.exp && decoded.exp < currentTime) {
+            // Token expired, clean up
+            console.log('Token expired');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setToken(null);
+            setRole('');
+            setUserName('');
+          } else {
+            // Valid token
+            setToken(storedToken);
+            setRole(decoded.role);
+          }
+        } catch (error) {
+          console.error('Error decoding token:', error);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setToken(null);
+          setRole('');
+        }
+      } else {
+        // No token found
+        setToken(null);
         setRole('');
       }
-    }
-  }, [token]);
+    };
+    
+    // Check auth status immediately and whenever route changes
+    checkAuthStatus();
+  }, [location.pathname]); // Re-run when route changes
   
   const handleScroll = () => {
     if (window.scrollY > 20) {
@@ -31,19 +61,45 @@ const Navbar = () => {
     }
   };
   
-  // Load user name from localStorage if available
+  // Load user name from localStorage after authentication state is updated
   useEffect(() => {
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        const user = JSON.parse(localStorage.getItem('user'));
-        setUserName(user?.name || decoded?.name || '');
-      } catch (error) {
-        console.error('Error decoding token:', error);
+    const updateUserName = () => {
+      if (token) {
+        try {
+          const decoded = jwtDecode(token);
+          let userName = '';
+          
+          // Try to get user from localStorage
+          try {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+              const user = JSON.parse(userStr);
+              userName = user?.name || '';
+            }
+          } catch (e) {
+            console.error('Error parsing user from localStorage:', e);
+          }
+          
+          // Fallback to decoded token name if available
+          if (!userName && decoded?.name) {
+            userName = decoded.name;
+          }
+          
+          setUserName(userName);
+        } catch (error) {
+          console.error('Error decoding token:', error);
+        }
+      } else {
+        // Clear username if no token
+        setUserName('');
       }
-    }
+    };
     
-    // Add scroll event listener
+    updateUserName();
+  }, [token, location.pathname]); // Re-run when token changes or route changes
+  
+  // Add scroll event listener
+  useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
         setScrolled(true);
@@ -54,11 +110,20 @@ const Navbar = () => {
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [token]);
+  }, []);
 
   const handleLogout = () => {
+    // Clear all authentication data
     localStorage.removeItem('token');
-    navigate('/login');
+    localStorage.removeItem('user');
+    
+    // Update state to reflect logged out status
+    setToken(null);
+    setRole('');
+    setUserName('');
+    
+    // Navigate to home page
+    navigate('/');
   };
 
   return (
