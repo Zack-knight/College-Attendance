@@ -592,6 +592,9 @@ const FeedbackApp = () => {
                               <div>
                                 <div className="text-sm font-medium text-gray-900">{item.student?.name || 'Unknown'}</div>
                                 <div className="text-xs text-gray-500">{item.student?.enrollmentNumber || '-'}</div>
+                                {item.student?.branch && (
+                                  <div className="text-xs text-teal-600 font-medium">{item.student.branch}</div>
+                                )}
                               </div>
                             </div>
                           </td>

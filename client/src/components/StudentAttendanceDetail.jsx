@@ -560,6 +560,9 @@ const StudentAttendanceDetail = () => {
               {student.semester && (
                 <p className="text-gray-600">Semester: {student.semester}</p>
               )}
+              {student.branch && (
+                <p className="text-teal-600 font-medium text-sm">Branch: {student.branch}</p>
+              )}
               {/* Subject Selection Dropdown */}
               <div className="mt-2">
                 <label htmlFor="subject-filter" className="text-gray-600 mb-1 block">Subject:</label>

@@ -11,6 +11,7 @@ const Register = () => {
     role: 'student',
     enrollmentNumber: '',
     semester: '',
+    branch: '', // New field for branch/degree name
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -29,6 +30,12 @@ const Register = () => {
     }
     if (formData.role === 'student' && !formData.semester.trim()) {
       setError('Semester is required for students.');
+      return;
+    }
+    
+    // Branch/degree validation for students
+    if (formData.role === 'student' && !formData.branch.trim()) {
+      setError('Branch or degree name is required for students.');
       return;
     }
     
@@ -237,27 +244,51 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Semester field only for students */}
+          {/* Fields only for students */}
           {formData.role === 'student' && (
-            <div className="space-y-1 animate-fadeIn">
-              <label className="block text-gray-700 text-sm font-medium">Semester</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                  </svg>
+            <>
+              {/* Branch/Degree field */}
+              <div className="space-y-1 animate-fadeIn">
+                <label className="block text-gray-700 text-sm font-medium">Branch/Degree Name</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10.496 2.132a1 1 0 00-.992 0l-7 4A1 1 0 003 8v7a1 1 0 100 2h14a1 1 0 100-2V8a1 1 0 00.496-1.868l-7-4zM6 9a1 1 0 00-1 1v3a1 1 0 102 0v-3a1 1 0 00-1-1zm3 1a1 1 0 012 0v3a1 1 0 11-2 0v-3zm5-1a1 1 0 00-1 1v3a1 1 0 102 0v-3a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="e.g., Computer Science Engineering"
+                    value={formData.branch}
+                    onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+                    className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 text-gray-800 transition-all duration-200 bg-white bg-opacity-90 shadow-sm group-hover:shadow-md"
+                    required
+                  />
                 </div>
-                <input
-                  type="text"
-                  placeholder="e.g., 4th"
-                  value={formData.semester}
-                  onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-                  className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 text-gray-800 transition-all duration-200 bg-white bg-opacity-90 shadow-sm group-hover:shadow-md"
-                  required
-                />
+                <p className="text-xs text-gray-500">Enter your branch or degree name (e.g., CSE, IT, MCA)</p>
               </div>
-              <p className="text-xs text-gray-500">Enter your current semester (e.g., 1st, 2nd, 3rd)</p>
-            </div>
+
+              {/* Semester field */}
+              <div className="space-y-1 animate-fadeIn mt-4">
+                <label className="block text-gray-700 text-sm font-medium">Semester</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="e.g., 4th"
+                    value={formData.semester}
+                    onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
+                    className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-400 text-gray-800 transition-all duration-200 bg-white bg-opacity-90 shadow-sm group-hover:shadow-md"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Enter your current semester (e.g., 1st, 2nd, 3rd)</p>
+              </div>
+            </>
           )}
           
           <button

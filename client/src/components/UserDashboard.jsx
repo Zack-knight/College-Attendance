@@ -119,6 +119,7 @@ const UserDashboard = () => {
               <span className="font-semibold">{studentInfo.name}</span> | 
               Enrollment: <span className="font-semibold">{studentInfo.enrollmentNumber || 'N/A'}</span>
               {studentInfo.semester && ` | Semester: ${studentInfo.semester}`}
+              {studentInfo.branch && ` | Branch: ${studentInfo.branch}`}
             </div>
           )}
         </div>

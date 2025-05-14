@@ -214,6 +214,12 @@ const UserList = () => {
                     >
                       Enrollment No. {getSortIndicator('enrollmentNumber')}
                     </th>
+                    <th 
+                      className="px-6 py-4 font-semibold cursor-pointer hover:bg-teal-500 transition"
+                      onClick={() => handleSort('branch')}
+                    >
+                      Branch {getSortIndicator('branch')}
+                    </th>
                     <th className="px-6 py-4 font-semibold">Actions</th>
                   </tr>
                 </thead>
@@ -231,6 +237,17 @@ const UserList = () => {
                         <td className="px-6 py-4">{user.email}</td>
                         <td className="px-6 py-4">{getRoleBadge(user.role)}</td>
                         <td className="px-6 py-4">{user.enrollmentNumber || '-'}</td>
+                        <td className="px-6 py-4">
+                          {user.role === 'student' ? (
+                            user.branch ? (
+                              <span className="text-teal-600 font-medium">{user.branch}</span>
+                            ) : (
+                              <span className="text-gray-400 italic">Not specified</span>
+                            )
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
                         <td className="px-6 py-4">
                           {confirmDelete === user._id ? (
                             <div className="flex space-x-2">

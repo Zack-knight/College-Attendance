@@ -12,6 +12,47 @@ function toCSV(rows, columns) {
   return [header, ...csvRows].join('\r\n');
 }
 
+// Summary CSV export helper - creates a CSV matching the table structure shown on the web page
+function toSummaryCSV(students, subjects) {
+  // Create header row with subjects
+  const headerRow = ['Student Name', 'Enrollment Number'];
+  
+  // For each subject, add columns for total classes, attendance count and percentage
+  subjects.forEach(subject => {
+    headerRow.push(
+      `${subject.name} (Total Classes)`,
+      `${subject.name} (Attended)`, 
+      `${subject.name} (%)`
+    );
+  });
+  
+  // Create data rows for each student
+  const rows = students.map(student => {
+    const row = [student.name, student.enrollmentNumber];
+    
+    // Add data for each subject
+    subjects.forEach(subject => {
+      const attendance = student.attendance[subject._id] || { attended: 0, percent: 0, total: 0 };
+      const total = attendance.total || (attendance.attended && attendance.percent ? 
+        Math.round(attendance.attended * 100 / attendance.percent) : 0);
+      
+      row.push(
+        total.toString(),
+        attendance.attended.toString(), 
+        `${attendance.percent}%`
+      );
+    });
+    
+    return row;
+  });
+  
+  // Format CSV string
+  const headerCSV = headerRow.map(item => `"${item}"`).join(',');
+  const rowsCSV = rows.map(row => row.map(cell => `"${(cell ?? '').toString().replace(/"/g, '""')}"`).join(','));
+  
+  return [headerCSV, ...rowsCSV].join('\r\n');
+}
+
 const AttendanceRecords = () => {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -37,6 +78,9 @@ const AttendanceRecords = () => {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [summary, setSummary] = useState({ subjects: [], students: [] });
+  
+  // Calculate total pages based on total records and page size - used for pagination controls
+  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
 
   // Fetch filter options (subjects, faculties)
   useEffect(() => {
@@ -344,8 +388,6 @@ const AttendanceRecords = () => {
     return sortOrder === 'asc' ? ' ▲' : ' ▼';
   };
 
-  const totalPages = Math.ceil(totalRecords / pageSize);
-
   const getStatusStyle = (status) =>
     status.toLowerCase() === 'present'
       ? 'bg-green-100 text-green-700'
@@ -354,13 +396,36 @@ const AttendanceRecords = () => {
   // Export to CSV handler
   const handleExportCSV = async () => {
     try {
+      // Check if summary data is available
+      if (summary.students && summary.students.length > 0 && summary.subjects && summary.subjects.length > 0) {
+        // Use summary data to generate CSV (matches the table structure seen on the web page)
+        const csv = toSummaryCSV(summary.students, summary.subjects);
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        // Use more descriptive filename with date
+        const today = new Date().toISOString().slice(0, 10);
+        a.download = `attendance_summary_${today}.csv`;
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return;
+      }
+      
+      // Fallback to fetching detailed records if summary is not available
       const params = { ...filters, page: 1, pageSize: 10000, sortBy, sortOrder };
       const response = await axios.get('/attendance/records', { params });
       const records = response.data.records || [];
+      
       if (!records.length) {
         alert('No records to export.');
         return;
       }
+      
       const columns = [
         { key: 'enrollmentNumber', label: 'Enrollment No.' },
         { key: 'studentName', label: 'Student Name' },
@@ -371,18 +436,21 @@ const AttendanceRecords = () => {
         { key: 'status', label: 'Status' },
         { key: 'date', label: 'Date' },
       ];
+      
       const csv = toCSV(records.map(r => ({ ...r, date: new Date(r.date).toLocaleDateString() })), columns);
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'attendance_records.csv';
+      const today = new Date().toISOString().slice(0, 10);
+      a.download = `attendance_records_${today}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch {
-      alert('Failed to export CSV.');
+    } catch (error) {
+      console.error('CSV export error:', error);
+      alert('Failed to export CSV. ' + (error.message || ''));
     }
   };
 
@@ -615,21 +683,33 @@ const AttendanceRecords = () => {
                     <td className="px-4 py-2 border-b border-gray-100">{stu.enrollmentNumber}</td>
                     <td className="px-4 py-2 border-b border-gray-100">
                       {/* Only make names clickable for faculty and admin */}
-                      {user && (user.role === 'teacher' || user.role === 'admin') ? (
-                        <Link 
-                          to={`/student-attendance/${stu._id}`} 
-                          className="text-teal-600 hover:text-teal-800 hover:underline font-medium flex items-center"
-                          title="View detailed attendance history"
-                          onClick={() => console.log('Clicked on student:', stu.name, 'with ID:', stu._id)}
-                        >
-                          {stu.name}
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                          </svg>
-                        </Link>
-                      ) : (
-                        stu.name
-                      )}
+                      <div>
+                        {user && (user.role === 'teacher' || user.role === 'admin') ? (
+                          <div>
+                            <Link 
+                              to={`/student-attendance/${stu._id || stu.enrollmentNumber}`} 
+                              className="text-teal-600 hover:text-teal-800 hover:underline font-medium flex items-center"
+                              title="View detailed attendance history"
+                              onClick={() => console.log('Clicked on student:', stu.name, 'with ID:', stu._id || stu.enrollmentNumber)}
+                            >
+                              {stu.name}
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                              </svg>
+                            </Link>
+                            {stu.branch && (
+                              <div className="text-xs text-teal-600 font-medium mt-1">{stu.branch}</div>
+                            )}
+                          </div>
+                        ) : (
+                          <div>
+                            <div>{stu.name}</div>
+                            {stu.branch && (
+                              <div className="text-xs text-teal-600 font-medium mt-1">{stu.branch}</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     {summary.subjects.map(subj => {
                       const att = stu.attendance[subj._id] || { attended: 0, percent: 0 };
@@ -639,7 +719,7 @@ const AttendanceRecords = () => {
                             {/* Make subject specific attendance detail accessible */}
                             {user && (user.role === 'teacher' || user.role === 'admin') ? (
                               <Link 
-                                to={`/student-attendance/${stu._id}/${subj._id}`}
+                                to={`/student-attendance/${stu._id || stu.enrollmentNumber}/${subj._id || subj.code}`}
                                 className="text-teal-600 hover:text-teal-800 hover:underline"
                                 title={`View ${stu.name}'s attendance for ${subj.name}`}
                               >

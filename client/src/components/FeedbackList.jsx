@@ -210,6 +210,7 @@ const FeedbackApp = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">Student</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">Branch</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">Message</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">Date</th>
                     <th className="px-6 py-3 text-center text-xs font-semibold text-teal-700 uppercase tracking-wider border-b border-gray-200">Actions</th>
@@ -236,6 +237,11 @@ const FeedbackApp = () => {
                               <div className="text-sm font-medium text-gray-900">{item.student?.name || 'Unknown'}</div>
                               <div className="text-xs text-gray-500">{item.student?.enrollmentNumber || '-'}</div>
                             </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-medium text-teal-600">
+                            {item.student?.branch || '-'}
                           </div>
                         </td>
                         <td className="px-6 py-4">

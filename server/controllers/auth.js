@@ -27,7 +27,7 @@ const generateRefreshToken = (user) => {
 };
 
 // Input validation function
-const validateRegistrationInput = (name, email, password, role, enrollmentNumber, semester) => {
+const validateRegistrationInput = (name, email, password, role, enrollmentNumber, semester, branch) => {
   const errors = {};
 
   // Validate name
@@ -60,6 +60,11 @@ const validateRegistrationInput = (name, email, password, role, enrollmentNumber
   if (role === 'student' && (!semester || semester < 1 || semester > 8)) {
     errors.semester = 'Invalid semester for student';
   }
+  
+  // Validate branch for students
+  if (role === 'student' && (!branch || branch.trim() === '')) {
+    errors.branch = 'Branch or degree name is required for students';
+  }
 
   return {
     isValid: Object.keys(errors).length === 0,
@@ -68,10 +73,10 @@ const validateRegistrationInput = (name, email, password, role, enrollmentNumber
 };
 
 exports.register = async (req, res) => {
-  const { name, email, password, role, enrollmentNumber, semester } = req.body;
+  const { name, email, password, role, enrollmentNumber, semester, branch } = req.body;
 
   // Validate input
-  const { isValid, errors } = validateRegistrationInput(name, email, password, role, enrollmentNumber, semester);
+  const { isValid, errors } = validateRegistrationInput(name, email, password, role, enrollmentNumber, semester, branch);
   if (!isValid) {
     return res.status(400).json({ errors });
   }
@@ -93,7 +98,8 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       role,
       enrollmentNumber,
-      semester: role === 'student' ? semester : undefined
+      semester: role === 'student' ? semester : undefined,
+      branch: role === 'student' ? branch : undefined
     });
     await user.save();
 

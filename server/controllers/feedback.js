@@ -24,7 +24,7 @@ exports.submitFeedback = async (req, res) => {
 
 exports.getFeedback = async (req, res) => {
   try {
-    const feedback = await Feedback.find().populate('student', 'name enrollmentNumber');
+    const feedback = await Feedback.find().populate('student', 'name enrollmentNumber branch');
     res.status(200).json(feedback);
   } catch (err) {
     res.status(500).json({ error: err.message });
